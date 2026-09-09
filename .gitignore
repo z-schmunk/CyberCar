@@ -112,3 +112,9 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local delivery backups, machine-specific shortcuts, Python cache
+/Backups/
+/Launchers/
+__pycache__/
+*.pyc
