@@ -1,0 +1,59 @@
+[
+  {
+    "source": "rock_face_01",
+    "output": "Assets\\Resources\\Photographic\\Models\\RockFace.fbx",
+    "triangles": 12000,
+    "bounds": [
+      [
+        -2.133601427078247,
+        -0.36125504970550537,
+        -0.035772744566202164
+      ],
+      [
+        2.8199098110198975,
+        3.466008186340332,
+        3.5293123722076416
+      ]
+    ],
+    "normalization": "Ground centered; original preserved; decimated for runtime",
+    "sha256": "15f40b2cec22473dca852052513f5c5053fbac4e30d293e93cb58eea607049d6"
+  },
+  {
+    "source": "street_lamp_01",
+    "output": "Assets\\Resources\\Photographic\\Models\\StreetLamp.fbx",
+    "triangles": 10000,
+    "bounds": [
+      [
+        -0.35217753052711487,
+        -0.19299007952213287,
+        0.0
+      ],
+      [
+        0.35217753052711487,
+        0.19299006462097168,
+        3.8705313205718994
+      ]
+    ],
+    "normalization": "Ground centered; original preserved; decimated for runtime",
+    "sha256": "c33750dbdb400d42033cc5d452c0ed929f1307cf1b4a1678767995fd80b20dfb"
+  },
+  {
+    "source": "pine_sapling_medium",
+    "output": "Assets\\Resources\\Photographic\\Models\\PineSapling.fbx",
+    "triangles": 89998,
+    "bounds": [
+      [
+        -2.6018688678741455,
+        -2.8523244857788086,
+        -0.20787619054317474
+      ],
+      [
+        12.910456657409668,
+        2.5583250522613525,
+        11.289047241210938
+      ]
+    ],
+    "normalization": "Ground centered; original preserved; decimated for runtime",
+    "sha256": "980d7a19e5680fcb4e7391eb48cbb07aeb106b9eff9c623b5b6ee1e977dbbee1"
+  }
+]

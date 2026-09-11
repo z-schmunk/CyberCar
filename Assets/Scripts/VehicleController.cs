@@ -12,6 +12,10 @@ namespace CyberCar
         public bool Driving;
         public float Throttle,Steer;
         public bool Brake;
+        public bool Drift;
+        public bool IsDrifting {get;private set;}
+        public float DriftSeconds {get;private set;}
+        public float SteeringPolarity=1;
         public float MaxSpeed=29;
         public float ControlNoise;
         public float EngineLimit=1;
@@ -21,6 +25,10 @@ namespace CyberCar
         float modelYaw;
         float hitCooldown;
         AudioSource engine,impact;
+        readonly System.Collections.Generic.List<Transform> wheelPivots=new System.Collections.Generic.List<Transform>();
+        readonly System.Collections.Generic.List<bool> frontWheels=new System.Collections.Generic.List<bool>();
+        TrailRenderer[] skidTrails;
+        float wheelSpin;
         void Awake()
         {
             Body=GetComponent<Rigidbody>();Body.mass=1200;Body.linearDamping=.12f;Body.angularDamping=4;
@@ -43,6 +51,13 @@ namespace CyberCar
                     for(int i=0;i<mats.Length;i++) if(mats[i]!=null&&mats[i].name.Contains("BodyPaint"))mats[i]=paint;
                     r.sharedMaterials=mats;
                 }
+                var parts=visual.GetComponentsInChildren<Transform>();
+                foreach(var wheel in parts)if(wheel.name.StartsWith("Wheel"))
+                {
+                    var pivot=new GameObject("Animated wheel").transform;pivot.SetParent(visual);pivot.position=wheel.position;pivot.localRotation=Quaternion.identity;
+                    frontWheels.Add(transform.InverseTransformPoint(wheel.position).z>0);wheelPivots.Add(pivot);
+                    foreach(var part in parts)if((part.name.StartsWith("Wheel")||part.name.StartsWith("Hub")||part.name.StartsWith("Alloy spoke"))&&Vector3.Distance(part.position,pivot.position)<.65f)part.SetParent(pivot,true);
+                }
             }
             else
             {
@@ -50,10 +65,13 @@ namespace CyberCar
                 visual.localPosition=Vector3.up*.8f;visual.localScale=new Vector3(2.1f,.8f,4.5f);
                 Destroy(visual.GetComponent<Collider>());visual.GetComponent<Renderer>().sharedMaterial=paint;
             }
+            gameObject.AddComponent<VehicleFeedback>().Initialize(this);
             if(IsPlayer)
             {
                 engine=gameObject.AddComponent<AudioSource>();engine.clip=MakeTone(false);engine.loop=true;engine.volume=.08f;engine.Play();
                 impact=gameObject.AddComponent<AudioSource>();impact.clip=MakeTone(true);impact.volume=.45f;
+                skidTrails=new TrailRenderer[2];
+                for(int i=0;i<2;i++){var trail=new GameObject("Drift tire trace");trail.transform.SetParent(transform,false);trail.transform.localPosition=new Vector3(i==0?-.88f:.88f,.16f,-1.45f);var t=trail.AddComponent<TrailRenderer>();t.sharedMaterial=Resources.Load<Material>("Impact");t.time=5;t.startWidth=.22f;t.endWidth=.2f;t.startColor=new Color(.03f,.03f,.03f,.6f);t.endColor=new Color(.03f,.03f,.03f,0);t.minVertexDistance=.2f;t.emitting=false;skidTrails[i]=t;}
             }
         }
         static AudioClip MakeTone(bool crash)
@@ -66,20 +84,27 @@ namespace CyberCar
         {
             if(engine){engine.pitch=.55f+Mathf.Abs(Speed)/19;engine.volume=Driving?.045f+Mathf.Abs(Throttle)*.04f:0;}
             if(visual)visual.localRotation=Quaternion.Euler(Throttle*-1.5f,modelYaw,-Steer*Mathf.Clamp(Speed,-15,15)*.16f);
+            wheelSpin-=Speed*Time.deltaTime/.48f*Mathf.Rad2Deg;
+            for(int i=0;i<wheelPivots.Count;i++)wheelPivots[i].localRotation=Quaternion.Euler(wheelSpin,frontWheels[i]?Steer*22:0,0);
+            if(skidTrails!=null)foreach(var trail in skidTrails)trail.emitting=Driving&&IsDrifting;
         }
         void FixedUpdate()
         {
             if(!Driving)return;
             bool grounded=Physics.Raycast(transform.position+Vector3.up*.15f,Vector3.down,.55f);
-            if(!grounded)return;
+            if(!grounded){IsDrifting=false;return;}
             float speed=Speed;
             Vector3 lateral=transform.right*Vector3.Dot(Body.linearVelocity,transform.right);
-            Body.AddForce(-lateral*(Brake?3:8),ForceMode.Acceleration);
+            IsDrifting=Drift&&Mathf.Abs(speed)>8&&Mathf.Abs(Steer)>.12f;
+            float grip=IsDrifting?1.05f:Brake?3:8;
+            Body.AddForce(-lateral*grip,ForceMode.Acceleration);
+            if(IsDrifting){DriftSeconds+=Time.fixedDeltaTime;Body.AddForce(transform.right*Steer*2.8f,ForceMode.Acceleration);}
             if((Throttle>0&&speed<MaxSpeed*EngineLimit)||(Throttle<0&&speed>-9))Body.AddForce(transform.forward*Throttle*13*EngineLimit,ForceMode.Acceleration);
             if(Mathf.Abs(Throttle)<.01f)Body.AddForce(-transform.forward*speed*.45f,ForceMode.Acceleration);
-            if(Brake)Body.AddForce(-Body.linearVelocity*3.8f,ForceMode.Acceleration);
-            float steering=Steer+ControlNoise*Mathf.Sin(Time.time*3.1f);
+            if(Brake||(IsPlayer&&Session!=null&&Session.ReplayBraking))Body.AddForce(-Body.linearVelocity*3.8f,ForceMode.Acceleration);
+            float steering=Steer*SteeringPolarity+ControlNoise*Mathf.Sin(Time.time*3.1f);
             float turn=steering*Mathf.Sign(speed)*Mathf.Clamp01(Mathf.Abs(speed)/4)*Mathf.Lerp(85,40,Mathf.Abs(speed)/MaxSpeed);
+            if(IsDrifting)turn*=1.25f;
             Body.MoveRotation(Body.rotation*Quaternion.Euler(0,turn*Time.fixedDeltaTime,0));
         }
         public void Damage(float amount)
@@ -101,6 +126,7 @@ namespace CyberCar
         }
         public void Recover(Vector3 position,Quaternion rotation)
         {
+            IsDrifting=false;Drift=false;if(skidTrails!=null)foreach(var trail in skidTrails)trail.Clear();
             Body.position=position+Vector3.up*.08f;Body.rotation=rotation;Body.linearVelocity=Vector3.zero;Body.angularVelocity=Vector3.zero;
         }
     }

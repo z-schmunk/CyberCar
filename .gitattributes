@@ -169,3 +169,6 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+
+# Large original CC0 model sources
+/ArtSource/Vendor/**/*.bin filter=lfs diff=lfs merge=lfs -text

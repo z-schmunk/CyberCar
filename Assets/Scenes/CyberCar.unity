@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &648732102
+--- !u!1 &1558630812
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 648732104}
-  - component: {fileID: 648732103}
+  - component: {fileID: 1558630814}
+  - component: {fileID: 1558630813}
   m_Layer: 0
   m_Name: CyberCar Game
   m_TagString: Untagged
@@ -136,29 +136,30 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &648732103
+--- !u!114 &1558630813
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 648732102}
+  m_GameObject: {fileID: 1558630812}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bfcf463b42cfefa40bf1b334cdf5b2dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CyberCar.GameSession
+  LastLesson: -1
   NoticeUntil: 0
   NoticeWarning: 0
   Testing: 0
   InputEnabled: 1
---- !u!4 &648732104
+--- !u!4 &1558630814
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 648732102}
+  m_GameObject: {fileID: 1558630812}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -171,4 +172,4 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 648732104}
+  - {fileID: 1558630814}

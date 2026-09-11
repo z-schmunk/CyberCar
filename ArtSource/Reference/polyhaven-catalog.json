@@ -1,0 +1,507 @@
+{
+  "aerial_beach_02": {
+    "type": 1,
+    "tags": [
+      "beach",
+      "flat",
+      "costal",
+      "ocean",
+      "seaside"
+    ],
+    "date_published": 1609950183,
+    "sponsors": [
+      "42579608"
+    ],
+    "name": "Aerial Beach 02",
+    "categories": [
+      "terrain",
+      "sand",
+      "natural",
+      "outdoor",
+      "aerial"
+    ],
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "dimensions": [
+      20000.011444091797,
+      20000
+    ],
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "files_hash": "c1b18f5ec3ebf888e2dbd57c6cd2dd72a7bc3293",
+    "description": "Free 8K texture of flat coastal sand with fine grains, moist dark patches and subtle ripple patterns - an aerial-ready material for terrain and seaside scenes.",
+    "category_id": "2bed9a9d-8f5f-5f1f-815c-e33cfa63bf69",
+    "category": "Ground & Terrain/Sand/Beach & Coastal Sand",
+    "attributes": {
+      "surface_use": "ground",
+      "origin": "natural",
+      "setting": "outdoor",
+      "aerial": true,
+      "condition": [
+        "clean"
+      ]
+    },
+    "img_version": "e9df1cb6",
+    "download_count": 36572,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/aerial_beach_02.png?width=256&height=256&v=e9df1cb6"
+  },
+  "asphalt_02": {
+    "type": 1,
+    "date_published": 1596694249,
+    "name": "Asphalt 02",
+    "categories": [
+      "terrain",
+      "road",
+      "man made",
+      "outdoor",
+      "floor"
+    ],
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "sponsors": [
+      "26820710"
+    ],
+    "dimensions": [
+      3000.000238418579,
+      3000
+    ],
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "files_hash": "2839a331f389f6ad1e30a78f24db58369d92f742",
+    "tags": [
+      "asphalt",
+      "cracked",
+      "flat",
+      "road",
+      "asphalt road",
+      "tarmac road",
+      "gritty",
+      "weathered",
+      "grey",
+      "cracking",
+      "tar",
+      "cracks"
+    ],
+    "description": "Free 8K texture of weathered grey asphalt: gritty coarse aggregate, subtle tar cracks, rough matte surface with uneven wear.",
+    "category_id": "ae6df066-2cbf-5772-9092-3cd86ed6394e",
+    "category": "Asphalt & Bitumen/Asphalt/Cracked Asphalt",
+    "attributes": {
+      "surface_use": "floor",
+      "condition": [
+        "weathered",
+        "cracked"
+      ],
+      "origin": "man_made",
+      "setting": "outdoor"
+    },
+    "img_version": "6af3d04c",
+    "download_count": 390091,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/asphalt_02.png?width=256&height=256&v=6af3d04c"
+  },
+  "grass_path_2": {
+    "type": 1,
+    "tags": [
+      "grass",
+      "pathway",
+      "path",
+      "ground",
+      "stones",
+      "sidewalk",
+      "rural",
+      "farm"
+    ],
+    "date_published": 1529359200,
+    "name": "Grass Path 2",
+    "categories": [
+      "terrain",
+      "natural",
+      "outdoor"
+    ],
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "dimensions": [
+      1000,
+      1000
+    ],
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "files_hash": "b4f12e39d7b91eb602717bd76dc4ed8a0ab34185",
+    "description": "Free 8K texture of a compacted dirt path with scattered stones and small grass tufts, rough, grainy earth with subtle displacement and worn, patchy areas.",
+    "category_id": "dd06ef8e-5807-534b-b7ac-19fb07264599",
+    "category": "Ground & Terrain/Rocky Ground/Rocky Paths & Trails",
+    "attributes": {
+      "surface_use": "ground",
+      "condition": [
+        "worn"
+      ],
+      "origin": "natural",
+      "setting": "outdoor"
+    },
+    "img_version": "7dd04a04",
+    "download_count": 79403,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/grass_path_2.png?width=256&height=256&v=7dd04a04"
+  },
+  "kloofendal_48d_partly_cloudy_puresky": {
+    "evs_cap": 21,
+    "type": 0,
+    "whitebalance": 5400,
+    "tags": [
+      "pure skies"
+    ],
+    "name": "Kloofendal 48d Partly Cloudy (Pure Sky)",
+    "categories": [
+      "outdoor",
+      "skies",
+      "nature",
+      "midday",
+      "partly cloudy",
+      "high contrast",
+      "natural light",
+      "pure skies"
+    ],
+    "coords": [
+      -26.14066228,
+      27.89984354
+    ],
+    "date_taken": 1553262240,
+    "info": "Edited sky-only version of [Kloofendal 48d Partly Cloudy](https://polyhaven.com/a/kloofendal_48d_partly_cloudy).",
+    "authors": {
+      "Greg Zaal": "Original",
+      "Jarod Guest": "Sky edits"
+    },
+    "date_published": 1668816000,
+    "files_hash": "4cce3bc9b9588036541551fe5ae8077af6b37e45",
+    "max_resolution": [
+      16384,
+      8192
+    ],
+    "sponsors": [
+      "45968783",
+      "77433244",
+      "76058381"
+    ],
+    "description": "Free 16K unclipped HDRI - midday partly-cloudy pure sky with bright sun, high-contrast natural light and crisp clouds for realistic outdoor lighting.",
+    "category_id": "61ac0f4c-0977-548f-b345-f34c2d9eff35",
+    "attributes": {
+      "time_of_day": "midday",
+      "weather": "partly_cloudy",
+      "light_type": "natural",
+      "contrast": "high",
+      "environment": "outdoor",
+      "sky_view": "open"
+    },
+    "category": "Pure Skies",
+    "img_version": "691edf4f",
+    "download_count": 864989,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/kloofendal_48d_partly_cloudy_puresky.png?width=256&height=256&v=691edf4f"
+  },
+  "pine_sapling_medium": {
+    "date_published": 1687737600,
+    "name": "Pine Sapling Medium",
+    "type": 2,
+    "authors": {
+      "Rob Tuytel": "photography",
+      "Rico Cilliers": "modeling"
+    },
+    "info": null,
+    "categories": [
+      "nature",
+      "plants",
+      "trees",
+      "collection: pine_forest"
+    ],
+    "geonodes": true,
+    "tags": [
+      "woodland",
+      "needles",
+      "pine",
+      "tree",
+      "sapling",
+      "branches",
+      "environment",
+      "coniferous",
+      "plants",
+      "trunk",
+      "bark",
+      "geometry nodes",
+      "foliage",
+      "natural",
+      "evergreen",
+      "twig",
+      "forest",
+      "vegetation",
+      "forest floor"
+    ],
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "polycount": 9784670,
+    "files_hash": "af56623e42ba6af60745dd721297559ca06d7d76",
+    "texel_density": 671.0111517492023,
+    "dimensions": [
+      22793.24197769165,
+      5462.29362487793,
+      11513.279110193253
+    ],
+    "lods": true,
+    "description": "Free 8K pine sapling model: slender trunk, twiggy branches, dense needle clusters and textured bark with natural evergreen foliage.",
+    "category_id": "eff5ec6a-39d3-5f51-8893-bb32d3153e7f",
+    "category": "Nature/Trees/Saplings",
+    "collections": [
+      "pine_forest"
+    ],
+    "attributes": {
+      "condition": [
+        "clean"
+      ],
+      "lods": true,
+      "geonodes": true,
+      "material": [
+        "wood"
+      ]
+    },
+    "img_version": "ab1c9a01",
+    "download_count": 21449,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/pine_sapling_medium.png?width=256&height=256&v=ab1c9a01"
+  },
+  "qwantani_night_puresky": {
+    "type": 0,
+    "name": "Qwantani Night (Pure Sky)",
+    "categories": [
+      "outdoor",
+      "natural light",
+      "nature",
+      "skies",
+      "clear",
+      "low contrast",
+      "night",
+      "pure skies"
+    ],
+    "tags": [
+      "pure skies"
+    ],
+    "authors": {
+      "Greg Zaal": "Photography",
+      "Jarod Guest": "Processing"
+    },
+    "info": "Edited sky-only version of [Qwantani Night](https://polyhaven.com/a/qwantani_night).",
+    "whitebalance": 4901,
+    "date_taken": 1724352180,
+    "coords": [
+      -28.48533209827116,
+      29.012639559934758
+    ],
+    "evs_cap": 23,
+    "max_resolution": [
+      24576,
+      12288
+    ],
+    "files_hash": "0478aaabb44e4947e5853f496f59433bf6d72af4",
+    "date_published": 1755820800,
+    "sponsors": [
+      "10485422"
+    ],
+    "description": "Free 24K unclipped HDRI - clear, low-contrast night sky with Milky Way and cool distant glows, great for subtle night lighting.",
+    "category_id": "61ac0f4c-0977-548f-b345-f34c2d9eff35",
+    "attributes": {
+      "time_of_day": "night",
+      "weather": "clear",
+      "light_type": "natural",
+      "contrast": "low",
+      "environment": "outdoor",
+      "sky_view": "open"
+    },
+    "category": "Pure Skies",
+    "img_version": "0f408adc",
+    "download_count": 72091,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/qwantani_night_puresky.png?width=256&height=256&v=0f408adc"
+  },
+  "rock_face_01": {
+    "name": "Rock Face 01",
+    "categories": [
+      "rocks",
+      "nature",
+      "collection: verdant_trail"
+    ],
+    "type": 2,
+    "version_required": {
+      "blend": "4.0.1"
+    },
+    "tags": [
+      "cliff",
+      "landscape",
+      "rock face",
+      "rock",
+      "formation",
+      "geology",
+      "weathered",
+      "lichen",
+      "rugged",
+      "outdoors",
+      "rocky surface",
+      "environment",
+      "natural"
+    ],
+    "authors": {
+      "Dario Barresi": "All"
+    },
+    "info": null,
+    "date_published": 1707177600,
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "polycount": 20174,
+    "texel_density": 855.3811959980296,
+    "dimensions": [
+      7108.232021331787,
+      5624.304533004761,
+      4980.4371148347855
+    ],
+    "sponsors": [
+      "3237733"
+    ],
+    "files_hash": "a39e6911cc84e0ceef097a98b1146885afb4afb3",
+    "description": "Free 8K model of a weathered rock face with layered sedimentary strata, rugged cracks, lichen patches and subtle blue-red mineral tones.",
+    "category_id": "f85e579c-2409-50c7-bac6-f3193d38593d",
+    "category": "Nature/Rocks & Stone/Cliffs & Rock Faces",
+    "collections": [
+      "verdant_trail"
+    ],
+    "attributes": {
+      "condition": [
+        "weathered"
+      ],
+      "material": [
+        "stone"
+      ]
+    },
+    "img_version": "60cb9b51",
+    "download_count": 6145,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/rock_face_01.png?width=256&height=256&v=60cb9b51"
+  },
+  "rocky_terrain_02": {
+    "name": "Rocky Terrain 02",
+    "type": 1,
+    "tags": [
+      "rocky",
+      "terrain",
+      "uneven terrain",
+      "grass",
+      "drone",
+      "landscape",
+      "nature",
+      "nature",
+      "boulders",
+      "wilderness",
+      "scenic",
+      "mountain",
+      "landform",
+      "natural landscape"
+    ],
+    "authors": {
+      "Amal Kumar": "All"
+    },
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "dimensions": [
+      90000,
+      90000
+    ],
+    "date_published": 1726704000,
+    "categories": [
+      "outdoor",
+      "terrain",
+      "natural",
+      "aerial"
+    ],
+    "files_hash": "a4c0d422c59c4234227eb04c1fa9d28694c60fbe",
+    "description": "Free, 8K terrain texture of uneven grassy ground with scattered rocks and boulder clusters, subtle height variation and soil patches",
+    "category_id": "ad8bbc58-82b8-5734-a99b-3fbdb7f0163c",
+    "category": "Ground & Terrain/Rocky Ground/Rocky Landscape",
+    "attributes": {
+      "surface_use": "ground",
+      "origin": "natural",
+      "setting": "outdoor",
+      "aerial": true,
+      "condition": [
+        "clean"
+      ]
+    },
+    "img_version": "6c54f222",
+    "download_count": 267486,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/rocky_terrain_02.png?width=256&height=256&v=6c54f222"
+  },
+  "street_lamp_01": {
+    "donated": true,
+    "name": "Street Lamp 01",
+    "type": 2,
+    "authors": {
+      "Josh Dean": "All"
+    },
+    "info": null,
+    "date_published": 1697760000,
+    "categories": [
+      "lighting",
+      "industrial",
+      "collection: hidden_alley"
+    ],
+    "tags": [
+      "street",
+      "road",
+      "light",
+      "lamppost",
+      "outdoor",
+      "pole",
+      "sidewalk",
+      "night",
+      " urban",
+      "city"
+    ],
+    "max_resolution": [
+      8192,
+      8192
+    ],
+    "polycount": 30610,
+    "texel_density": 3976.4525897344943,
+    "dimensions": [
+      704.3362259864807,
+      386.49316132068634,
+      3870.5554008483887
+    ],
+    "sponsors": [
+      "7934315"
+    ],
+    "files_hash": "002d697fa195d73f627e82804612208853212519",
+    "description": "Free 8K model: ornate cast-iron street lamp with glass panes, exposed bulb, weathered black finish and detailed base, finial and mounting hardware.",
+    "category_id": "ca8e62db-af7b-55a5-b668-48f0f26a1c16",
+    "category": "Lighting/Street & Outdoor/Street Lamps",
+    "collections": [
+      "hidden_alley"
+    ],
+    "attributes": {
+      "condition": [
+        "weathered"
+      ],
+      "material": [
+        "metal",
+        "glass"
+      ]
+    },
+    "img_version": "c103ab4f",
+    "download_count": 31286,
+    "thumbnail_url": "https://cdn.polyhaven.com/asset_img/thumbs/street_lamp_01.png?width=256&height=256&v=c103ab4f"
+  }
+}

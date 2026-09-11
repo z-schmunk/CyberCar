@@ -1,0 +1,68 @@
+SMOKE_PASS / Car accelerates under physics
+SMOKE_PASS / Physical collision causes impact and integrity loss
+SMOKE_PASS / Car-to-car collision transfers momentum
+SMOKE_PASS / Attack activates: 0
+SMOKE_PASS / Spoofed GPS points at physical hazard
+SMOKE_PASS / Correct defense contains attack: 0
+SMOKE_PASS / Cooldown prevents repeated activation: 0
+SMOKE_PASS / Attack activates: 1
+SMOKE_PASS / Signal flood removes GPS gate
+SMOKE_PASS / Correct defense contains attack: 1
+SMOKE_PASS / Cooldown prevents repeated activation: 1
+SMOKE_PASS / Attack activates: 2
+SMOKE_PASS / Injection changes steering input
+SMOKE_PASS / Correct defense contains attack: 2
+SMOKE_PASS / Cooldown prevents repeated activation: 2
+SMOKE_PASS / Bus isolation restores steering
+SMOKE_PASS / Attack activates: 3
+SMOKE_PASS / Ransomware restricts engine
+SMOKE_PASS / Correct defense contains attack: 3
+SMOKE_PASS / Cooldown prevents repeated activation: 3
+SMOKE_PASS / Backup restores engine power
+SMOKE_PASS / Attack activates: 4
+SMOKE_PASS / Correct defense contains attack: 4
+SMOKE_PASS / Cooldown prevents repeated activation: 4
+SMOKE_PASS / Attack activates: 5
+SMOKE_PASS / Correct defense contains attack: 5
+SMOKE_PASS / Cooldown prevents repeated activation: 5
+SMOKE_PASS / Attack activates: 6
+SMOKE_PASS / Malicious firmware reverses steering
+SMOKE_PASS / Correct defense contains attack: 6
+SMOKE_PASS / Cooldown prevents repeated activation: 6
+SMOKE_PASS / Signed rollback restores steering
+SMOKE_PASS / Pause freezes mission timer
+SMOKE_PASS / Expert traffic and hostile cars spawn
+SMOKE_PASS / Checkpoint delivery completes on map 0
+SMOKE_PASS / Expert traffic and hostile cars spawn
+SMOKE_PASS / Checkpoint delivery completes on map 1
+SMOKE_PASS / Expert traffic and hostile cars spawn
+SMOKE_PASS / Checkpoint delivery completes on map 2
+SMOKE_PASS / Expert traffic and hostile cars spawn
+SMOKE_PASS / Checkpoint delivery completes on map 3
+SMOKE_PASS / Drifting accumulates at driving speed
+SMOKE_PASS / Drifting creates lateral slip
+SMOKE_PASS / Releasing drift restores grip mode
+SMOKE_PASS / Field guide safely pauses driving
+SMOKE_PASS / Closing field guide resumes prior driving state
+SMOKE_PASS / Original soundtrack imported
+SMOKE_PASS / Unlocks and achievements survive disk reload
+SMOKE_PASS / Corrupted profile recovers previous backup
+SMOKE_PASS / Extreme mode creates a larger 81-node map
+SMOKE_PASS / Extreme accolade requires all attack defenses and safe citizens
+SMOKE_PASS / Extreme pedestrian strike fails the run
+SMOKE_PASS / Physical pedestrian contact records a safety violation
+BRIDGE_DIAGNOSTIC point=13 position=(283.10, 0.15, 0.15) highest=3.444722 speed=11.57021 health=100
+SMOKE_PASS / Car physically traverses a curved elevated beach-cliff bridge
+SMOKE_PASS / Destroyed vehicle fails mission
+SMOKE_PASS / Cliff fall fails mission
+SMOKE_PASS / Uncontained attack is recorded as missed
+SMOKE_PASS / Mission introduces its new attack first: 1
+SMOKE_PASS / Mission introduces its new attack first: 2
+SMOKE_PASS / Mission introduces its new attack first: 3
+SMOKE_PASS / Mission introduces its new attack first: 4
+SMOKE_PASS / Mission introduces its new attack first: 5
+SMOKE_PASS / Mission introduces its new attack first: 6
+SMOKE_PASS / Mission introduces its new attack first: 7
+SMOKE_PASS / Mission timer expiry fails delivery
+SMOKE_PASS / No runtime errors or exceptions
+CYBERCAR_SMOKE_SUCCESS / 66

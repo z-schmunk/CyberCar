@@ -1,95 +1,105 @@
 # CyberCarGame
 
-A local Windows driving game about defending connected vehicles. Created with Unity 6000.6.0f1 and Blender 5.1.1.
-
-## Project organization and GitHub Desktop
-
-The canonical project folder is `C:/Users/schmu/unityProjects/CyberCarGame`.
-
-- `Assets`, `Packages`, `ProjectSettings`: Unity source and settings.
-- `ArtSource`: Blender model and its generation script.
-- `Builds/Windows`: playable executable and generated runtime captures.
-- `Docs/Validation/Captures`: reviewed screenshots; `Docs/Validation` also holds test results.
-- `Docs/Delivery`: original delivery documents and receipt.
-- `Tools/PackageSource.py`: rebuild and verify a portable source backup.
-- `Tools/Archive`: original session packaging script retained for completeness.
-- `Backups`: source archives and backup receipt, kept locally.
-- `Launchers`: shortcuts to play the game or open Unity, kept locally.
-- `Logs`: project creation, build and runtime evidence, kept locally.
-
-This folder tracks `main` from `https://github.com/z-schmunk/CyberCar.git`. The repository's previous Unity template remains in Git history; the local changes replace it with this game. The original Unity Git attributes and Git LFS configuration are preserved. Builds, caches, backups and machine-specific shortcuts are ignored by Git.
-
-GitHub Desktop's saved CyberCar location was `C:/Users/schmu/AndroidStudioProjects/CyberCar`, which no longer existed. That path is now a directory junction pointing at the canonical project folder above. It contains no second copy of the game and allows the existing Desktop repository entry to resolve the project.
-
-The connection and organization do not commit or push changes. Review them in GitHub Desktop before publishing. Run `python Tools/PackageSource.py` from this folder to refresh `Backups/CyberCarGame-Source.zip`.
+A local Windows cyber-security driving game. Unity 6000.6.0f1 / Blender 5.1.1.
 
 ## Play
 
-Run `Builds/Windows/CyberCarGame.exe`. Keep its entire Windows folder together.
+Run `Builds/Windows/CyberCarGame.exe`; keep its Windows folder together.
+Complete nine missions to unlock freeplay. Returning players retain earlier unlocks, achievements and previously unlocked freeplay.
 
-Start with **Driver orientation**, then complete six progressively harder operations to unlock freeplay. Each mission introduces its newest attack first. Reach every teal GPS gate, then the destination, before time or vehicle integrity runs out. Freeplay offers three maps and three difficulty settings.
+Reach each teal GPS gate, then the destination, before time or integrity runs out. Every operation after orientation generates a fresh route through several districts. The circular GPS shows a heading-up local view within 170 meters. An edge marker points toward the next gate. Map geometry is fixed, while each delivery route changes.
 
 | Control | Action |
 |---|---|
-| W/S or Up/Down | Accelerate, brake into reverse |
-| A/D or Left/Right | Steer |
+| WASD / arrow keys | Accelerate, reverse, steer |
+| Shift while steering at speed | Drift; release to restore grip |
 | Space | Brake |
-| Q | Verify signed GPS route; counter spoofing |
-| E | Switch to cached offline map; counter denial of service |
-| R | Isolate compromised CAN controller; counter injected commands |
-| F | Restore clean backup; counter ransomware |
-| G | Authenticate V2X identities; counter Sybil convoy |
-| Backspace | Recover at last checkpoint, costs 10 integrity |
-| Escape | Pause / resume |
+| Q | Verify route: GPS spoofing |
+| E | Offline map: navigation denial of service |
+| R | Isolate controller: CAN command injection |
+| F | Restore clean backup: ransomware |
+| G | Authenticate V2X identities: Sybil convoy |
+| T | Check message freshness: replay attack |
+| Y | Trusted firmware recovery: malicious update |
+| U | Restore trusted local streetlight control: lighting takeover |
+| H | Open/close educational field guide; pauses driving |
+| M | Mute/unmute original soundtrack |
+| Backspace | Recover at previous gate; costs 10 integrity |
+| Escape | Pause/resume or close guide |
 
-You can also click defense buttons. Each defense has a cooldown. Incorrect diagnostics have a short cooldown. Learner difficulty displays defense hints; higher difficulties remove these hints and increase traffic and pressure. Expert permits overlapping attacks.
+Defense buttons also respond to mouse clicks. Successful defenses have an eight-second cooldown; mismatched diagnostics have a three-second cooldown. The field guide explains the attack, why its defense works, and what the simplified simulation omits.
 
-## Included
+## Campaign and maps
 
-- Arcade Rigidbody driving with momentum, lateral grip, braking, physical impacts, integrity loss, impact particles, engine/impact audio, and simple body compression.
-- Blender-authored interceptor with body, cabin, spoiler, wheels and materials; original `.blend` plus reproducible generation script.
-- Neon District: urban blocks and a closed service-road trap.
-- Container Harbor: causeways over water, cranes and cargo islands.
-- Red Rock Pass: elevated roads, rock mesas, guardrails and an unfinished bridge trap.
-- Six campaign operations with persistent unlocks.
-- Five simulated attack types, simultaneous driving/defense, GPS minimap, destination gates, pursuit vehicles and ambient traffic.
-- Per-level reports of encountered, contained and missed attacks, with brief explanations.
-- Nine persistent achievements, including first defense of each attack and a hidden encrypted cache.
-- Freeplay after the campaign, with map and difficulty selection.
+| Mission | Environment | New lesson |
+|---|---|---|
+| Driver orientation | Neon District | Driving, drifting and crosswalk safety |
+| Trust, but verify | Neon District | GPS spoofing |
+| Signal lost | Container Harbor | Denial of service and offline fallback |
+| Hands on the wheel | Red Rock Pass | Control-bus injection |
+| Recovery protocol | Container Harbor | Ransomware recovery |
+| Zero trust delivery | Neon District | Sybil identities |
+| Yesterday's commands | Container Harbor | Replayed brake commands |
+| Signed at the edge | Beach Cliffs | Malicious firmware |
+| Lights out | Neon District at night | Infrastructure lighting takeover |
 
-## Editing in Unity / VS Code
+City, harbor and canyon use 36 junctions; beach cliffs uses 49. Rural maps have irregular junction placement, fewer cross-connectors, smooth road curves and level junction approaches. Continuous mountainous terrain replaces block-shaped mesas. Harbor and cliffs include ocean and sandy shorelines; the cliff destination is a lighthouse.
 
-Add this folder to Unity Hub and open it with **6000.6.0f1**. Open `Assets/Scenes/CyberCar.unity`, then press Play. The scene has a single composition root; maps, vehicles and HUD are generated when the game starts, so an empty edit-time scene is expected.
+Orientation has six ambient cars and six citizens. Other missions have 12–27 ambient vehicles by difficulty, additional enemies, crosswalk pedestrians, and three traffic interchanges. Ordinary vehicles favor these interchanges. First entry triggers hostile reinforcements; attack pressure also increases there. Replay attacks can disrupt surrounding traffic.
 
-Edit C# files under `Assets/Scripts`. Use **CyberCar > Build Windows game** to regenerate the launch scene and executable. That menu writes the launch scene and relevant build/player settings, so save any intended custom scene elsewhere first. `ArtSource/create_car.py` regenerates `CyberInterceptor.blend` and the FBX under Resources using Blender.
+Yield to pedestrians. Contact costs 15 integrity and 15 seconds; three violations fail a normal run. Extreme fails on the first violation. Physical collisions transfer momentum and damage cars.
 
-| File | Responsibility |
-|---|---|
-| GameSession.cs | Campaign/freeplay flow, timers, checkpoints, defense input |
-| VehicleController.cs | Physics, impacts, audio, vehicle condition |
-| RoadNetwork.cs | Connected map graphs and shortest paths |
-| WorldBuilder.cs | Map geometry, signs, markers, impact effect |
-| TrafficAgent.cs | Road routing, pursuit and traffic steering |
-| AttackDirector.cs | Threat states, defenses, cooldowns and online attack selection |
-| GameHud.cs | Menus, briefing, GPS, HUD, reports and achievements |
-| ProgressStore.cs | Versioned local campaign/achievement keys |
-| RuntimeSmokeTest.cs | Opt-in standalone regression scenarios |
-| Editor/ProjectBuilder.cs | Scene generation, road validation and Windows build |
+## Freeplay and achievements
 
-## AI and educational scope
+Choose any of four maps, Day or Night, and Learner, Operator, Expert or Extreme difficulty. Expert permits two concurrent cyber attacks; Extreme permits three, uses a larger 81-junction map, more traffic and tighter time allowances.
 
-Enemy driving uses graph routing and reactive steering. Attack selection uses a small **online contextual bandit**: after the introductory attack sequence, it explores and learns attack expiry versus containment at low/high player speed. Learning resets each run. This is a working lightweight learning algorithm, not a pretrained neural network or Unity ML-Agents training project.
+**Extreme driver:** win an Extreme freeplay delivery, defend every available attack type during that run (seven by day, eight at night), and hit no pedestrians. This is deliberately harder than simply reaching the destination.
 
-Cyber events are safe local game simulations. There is no network interception or real vehicle interaction. Sybil represents forged vehicle identities coordinating hostile vehicles; authenticating senders temporarily stops their pursuit. Ramming itself is a physical consequence, not a cyber attack. Recovery and isolation are simplified to one-button actions so players can continue driving.
+Seventeen achievements include first delivery, first successful defense of each attack, a collision-free delivery, hidden cache, original-campaign veteran, 20 cumulative drift seconds within one run, safe delivery without pedestrian contact, coastal-campaign completion, Extreme driver, lighting recovery and night delivery.
 
-This is a playable prototype with procedural environments. Vehicle damage is not soft-body deformation; suspension and animated wheels are not simulated. Keyboard/mouse is supported; gamepad bindings and accessibility remapping are not yet included. Traffic is reactive and can become stuck; recovery handles stalled cars. No external paid assets, services, or credentials are required.
+## Night driving and visual assets
 
-## Validation
+The Lights out mission and Night freeplay use a photographed night panorama with a subtle procedural star field, warm streetlight pools and independent headlights. Lighting takeover disables streetlights; U isolates remote commands and restores the local lighting schedule. The field guide explains authentication, authorization, segmentation and recovery. Daylight uses a photographed cloud panorama.
 
-The builder checks connectivity from the start to every node in all three maps. Run the executable with `-smokeTest` to exercise acceleration, a real collision, all attack/defense pairs, cooldowns, pause, checkpoint completions, vehicle destruction and cliff failure. Test mode does not write campaign progress. Screenshots and `smoke-results.txt` are written beside the executable.
+Photographed 2K asphalt, rock, sand and ground textures use normal and roughness maps. CC0 Poly Haven rocks, pine and streetlamp models were reduced in Blender for runtime use. Source files, author credits and hashes are retained in ArtSource/Vendor and Docs/PolyHavenManifest.json. The existing car and city buildings remain stylized; this is a realism upgrade, not a claim of complete photorealism.
 
-See `Docs/Validation.md` for the final executed results and remaining limitations.
+Brake lamps respond to braking, including replay-induced braking. Drifting produces tire smoke and synthesized friction audio. The follow camera expands its view with speed and avoids solid obstructions.
 
-## Asset provenance
+## Saved progress
 
-All first-party C#, procedural level geometry, synthesized audio and the Blender interceptor were authored for this project during this session. No third-party asset downloads were used. Unity runtime and built-in resources retain their existing Unity terms. Keep `Assets`, `Packages`, `ProjectSettings`, `ArtSource` and `Docs` in backups; Unity can regenerate `Library`, `Temp`, `Logs` and IDE files.
+Unlocks, achievements and music volume save automatically to:
+`%USERPROFILE%/AppData/LocalLow/CyberCarLearning/CyberCarGame/driver-profile-v2.json`.
+
+Writes replace the file atomically and retain `.bak`. A malformed primary save falls back to that backup. The old `CyberCarGame.v1.` PlayerPrefs keys are migrated without deleting them. This saves long-term progress, not a suspended mid-race position. Saves are local to this Windows user, not cloud synced.
+
+## Project organization and GitHub Desktop
+
+Canonical folder: `C:/Users/schmu/unityProjects/CyberCarGame`.
+
+- `Assets`, `Packages`, `ProjectSettings`: Unity project.
+- `ArtSource`: original Blender car and reproducible car/music generation scripts.
+- `Builds/Windows`: playable build and generated test captures.
+- `Docs`: guides, architecture, validation and asset provenance.
+- `Tools/PackageSource.py`: verified portable source backup.
+- `Backups`: source archives, including the pre-expansion snapshot.
+- `Launchers`: local shortcuts; `Logs`: build/runtime evidence.
+
+The existing GitHub Desktop CyberCar entry resolves through the directory junction at `C:/Users/schmu/AndroidStudioProjects/CyberCar`. Its target is the canonical folder, with remote `https://github.com/z-schmunk/CyberCar.git`. This is one project copy. Changes have not been committed or pushed. Builds, caches, backups and local launchers are ignored; original Git attributes/LFS configuration remain.
+
+## Editing and rebuilding
+
+Open this folder in Unity Hub using **6000.6.0f1**. Open `Assets/Scenes/CyberCar.unity`, then Play. Maps, vehicles and HUD are composed at runtime.
+
+Edit C# under `Assets/Scripts`. **CyberCar > Build Windows game** regenerates the launch scene and build/player settings; save custom scenes separately. The builder checks four connected maps, 128 seeded routes and 81-node Extreme maps.
+
+`ArtSource/create_car.py` regenerates the Blender/FBX car. `python ArtSource/create_music.py` synthesizes the original soundtrack without samples or paid services. See `Docs/AssetProvenance.md`.
+
+Run the executable with `-smokeTest` for automated regression coverage. This mode prevents normal progression writes and uses isolated save-test files. Run `python Tools/PackageSource.py` from this folder to refresh the verified source archive.
+
+## Architecture and limits
+
+GameSession owns missions, gates and timers. RoadNetwork shares sampled curved paths between road meshes, traffic and minimap. WorldBuilder creates geometry. VehicleController provides Rigidbody arcade handling, drift, impact response and wheel animation. TrafficAgent steers graph routes and pursues locally. PedestrianAgent controls timed crossings. AttackDirector tracks defenses and a small contextual bandit that learns containment versus expiry during each run. ProgressStore manages versioned JSON; DriveMusic manages music; GameHud renders menus, guide and reports.
+
+This remains a procedural prototype rather than a photorealistic simulator. Damage is simple body compression; there is no detailed suspension or soft-body crash simulation. Human pedestrians are simple articulated figures. Traffic may jam and uses recovery behavior. Keyboard/mouse controls are supported; gamepad bindings are not implemented.
+
+Cyber events are entirely local educational simulations. Real vehicles do not expose these defenses as instant keyboard actions. Ramming is a physical consequence, not itself a cyber attack. The enemy learning model is a lightweight online contextual bandit, not a pretrained neural network. See `Docs/EducationReferences.md` for primary sources and `Docs/Validation.md` for executed evidence and limitations.
