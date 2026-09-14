@@ -12,17 +12,17 @@ namespace CyberCar {
  public int Finish{get;private set;} public Vector3 Hazard{get;private set;}
  public RoadNetwork(int map,bool extreme=false) {
  Map=map;Columns=extreme?9:map==3?7:6;
- for(int z=0;z<Rows;z++)for(int x=0;x<Columns;x++){int n=Nodes.Count;float warp=map==0?2:map==1?7:24;float px=x*Spacing+Mathf.Sin(z*.83f)*warp, pz=z*Spacing+Mathf.Sin(x*.91f)*warp;float y=map>=2?Mathf.Sin(x*.63f)*5+z*1.5f:0;Nodes.Add(new Vector3(px,y,pz));Names.Add("District "+(z+1)+" / Junction "+(x+1));if(x>0)Edges.Add(new Vector2Int(n-1,n));if(z>0&&(map<2||x==0||x==Columns-1||x%3==z%3))Edges.Add(new Vector2Int(n-Columns,n));}
+ for(int z=0;z<Rows;z++)for(int x=0;x<Columns;x++){int n=Nodes.Count;float warp=map==0?10:map==1?14:30;float px=x*Spacing+Mathf.Sin(z*.83f)*warp, pz=z*Spacing+Mathf.Sin(x*.91f)*warp;float y=map>=2?Mathf.Sin(x*.63f)*5+z*1.5f:0;Nodes.Add(new Vector3(px,y,pz));Names.Add("District "+(z+1)+" / Junction "+(x+1));if(x>0)Edges.Add(new Vector2Int(n-1,n));if(z>0&&(map<2||x==0||x==Columns-1||x%3==z%3))Edges.Add(new Vector2Int(n-Columns,n));}
  Finish=Nodes.Count-1;Names[0]="Operations garage";Names[Finish]=map==0?"Security campus":map==1?"Harbor control":map==2?"Summit observatory":"Clifftop lighthouse";
  Hotspots.Add(Columns+2);Hotspots.Add((Rows/2)*Columns+Columns/2);Hotspots.Add((Rows-2)*Columns+Columns-2);
  foreach(int n in Hotspots)Names[n]="Traffic interchange "+(Hotspots.IndexOf(n)+1);
- Hazard=Nodes[Columns-1]+Vector3.right*48;
+ Hazard=Nodes[Columns-1]+Vector3.right*120;
  }
  public bool IsBridge(int a,int b)=>Map!=0&&a/Columns==b/Columns&&Mathf.Min(a%Columns,b%Columns)==Columns/2-1;
  public Vector3[] Path(int a,int b) {
  long key=((long)a<<32)|(uint)b;if(paths.TryGetValue(key,out var stored))return stored;
  bool reversed=a>b;int lo=Mathf.Min(a,b),hi=Mathf.Max(a,b);Vector3 from=Nodes[lo],to=Nodes[hi],side=Vector3.Cross(Vector3.up,(to-from).normalized);
- float curve=(Map==0?0:Map==1?2:8)*Mathf.Sin(lo*1.713f+hi*.317f);const int steps=24;var result=new Vector3[steps+1];
+ float curve=((lo+hi)%3==0?0:Map==0?5:Map==1?8:13)*Mathf.Sin(lo*1.713f+hi*.317f);const int steps=24;var result=new Vector3[steps+1];
  bool horizontal=lo/Columns==hi/Columns;int stride=horizontal?1:Columns;
  Vector3 before=(horizontal?lo%Columns>0:lo>=Columns)?Nodes[lo-stride]:from-(to-from);
  Vector3 after=(horizontal?hi%Columns<Columns-1:hi<Nodes.Count-Columns)?Nodes[hi+stride]:to+(to-from);
@@ -31,10 +31,18 @@ namespace CyberCar {
  if(reversed)System.Array.Reverse(result);paths[key]=result;return result;
  }
  public int Nearest(Vector3 p){int best=0;float distance=float.MaxValue;for(int i=0;i<Nodes.Count;i++){float d=(Nodes[i]-p).sqrMagnitude;if(d<distance){best=i;distance=d;}}return best;}
- public List<int> Route(int start,int end) {
+ public List<int> Route(int start,int end,bool wrongWay=false) {
  var q=new Queue<int>();var prev=new Dictionary<int,int>();q.Enqueue(start);prev[start]=-1;
- while(q.Count>0){int n=q.Dequeue();if(n==end)break;foreach(var e in Edges){int k=e.x==n?e.y:e.y==n?e.x:-1;if(k<0||prev.ContainsKey(k))continue;prev[k]=n;q.Enqueue(k);}}
+ while(q.Count>0){int n=q.Dequeue();if(n==end)break;foreach(var e in Edges){int k=e.x==n?e.y:e.y==n?e.x:-1;if(k<0||prev.ContainsKey(k)||!wrongWay&&!CanTravel(n,k))continue;prev[k]=n;q.Enqueue(k);}}
  var route=new List<int>();if(!prev.ContainsKey(end))return route;for(int n=end;n!=-1;n=prev[n])route.Add(n);route.Reverse();return route;
+ }
+ public bool OneWay(int a,int b)=>Map==0&&a/Columns==b/Columns&&(a/Columns==1||a/Columns==3);
+ public bool CanTravel(int a,int b)=>!OneWay(a,b)||(a/Columns==1?b>a:a>b);
+ public float SpeedLimit=>Map==0?11.18f:Map==1?15.65f:22.35f;
+ public Vector3 ClosestRoad(Vector3 p,out Vector3 tangent,out float distance){
+ Vector3 best=Nodes[0];tangent=Vector3.forward;float sq=float.MaxValue;
+ foreach(var e in Edges){var path=Path(e.x,e.y);for(int i=1;i<path.Length;i++){Vector3 a=path[i-1],d=path[i]-a;Vector3 sample=a+d*Mathf.Clamp01(Vector3.Dot(p-a,d)/d.sqrMagnitude);float value=(p-sample).sqrMagnitude;if(value<sq){sq=value;best=sample;tangent=d.normalized;}}}
+ distance=Mathf.Sqrt(sq);return best;
  }
  public List<int> MissionRoute(int seed=42,bool orientation=false) {
  var rng=new System.Random(seed);var stops=new List<int>();

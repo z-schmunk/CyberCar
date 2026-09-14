@@ -15,12 +15,12 @@ namespace CyberCar {
  if(Session==null||Session.Player==null)return;
  var player=Session.Player;var car=player.transform;if(previousCar!=car){previousCar=car;initialized=false;}
  Vector3 anchor=car.position+Vector3.up*1.4f;
- Vector3 wanted=car.position+car.rotation*new Vector3(0,4.7f,-10.2f);
+ Quaternion heading=Quaternion.Euler(0,car.eulerAngles.y,0);Vector3 wanted=car.position+heading*new Vector3(0,4.7f,-10.2f);
  if(Session.State==GameState.Menu)wanted=car.position+new Vector3(-9,5,10);
  wanted=AvoidObstacles(anchor,wanted,player.Body);
  Vector3 smoothed=initialized?Vector3.Lerp(transform.position,wanted,1-Mathf.Exp(-6*Time.unscaledDeltaTime)):wanted;
  transform.position=AvoidObstacles(anchor,smoothed,player.Body);initialized=true;
- transform.LookAt(car.position+car.forward*3+Vector3.up);
+ transform.LookAt(car.position+heading*Vector3.forward*3+Vector3.up);
  float fov=62+(Session.State==GameState.Driving?Mathf.Clamp01(Mathf.Abs(player.Speed)/29)*6:0);
  view.fieldOfView=Mathf.Lerp(view.fieldOfView,fov,1-Mathf.Exp(-3*Time.unscaledDeltaTime));
  }

@@ -16,3 +16,15 @@ Sources checked 2026-09-10. These principles inform the educational examples; th
 ## Lighting takeover
 
 The night scenario applies authentication, authorization, remote-control isolation and local fallback to road-lighting infrastructure. It is a fictional simplified example of operational technology security. [NIST SP 800-82 Rev. 3](https://csrc.nist.gov/pubs/sp/800/82/r3/final) discusses securing systems that directly affect the physical environment while preserving safety and reliability. Headlights remain independent in the game.
+
+
+## September 14 story expansion
+
+- US DOT, How Connected Vehicles Work: https://www.transportation.gov/research-and-technology/how-connected-vehicles-work — short-range cooperative vehicle/infrastructure communication. The game's 115 m radius is a design choice, not a fixed DSRC specification.
+- US DOT CV Pilot open data: https://data.transportation.gov/stories/s/Connected-Vehicle-Pilot-CVP-Open-Data/hr8h-ufhq/ — examples include Basic Safety Messages, Traveler Information Messages and Signal Phase and Timing exchanges with RSUs.
+- GPS.gov interference overview: https://www.gps.gov/spectrum-interference-issues — radio interference can deny positioning. Roadside fallback does not remove the interference source.
+- CISA StopRansomware Guide: https://www.cisa.gov/stopransomware/ransomware-guide — isolation and recovery from offline backups. The game adds a toy XOR/key-verification exercise; real recovery depends on protected keys and verified backups, not guessing an attacker's key.
+
+All new attacks are inert local simulations. A DSRC link does not itself authenticate a location or supply a satellite-quality position. This game assumes authenticated surveyed roadside reference data and estimates travel between units using odometry. Encryption provides confidentiality; it does not make executable input safe or prove freshness. Independent sensor comparison also depends on independent trust and suitable fail-safe engineering.
+
+Virtual range, camera and bumper sensors now sample visible physics obstacles from separate mounting heights. They share the game physics scene; this does not model independent real sensor hardware.

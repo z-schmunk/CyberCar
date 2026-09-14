@@ -43,6 +43,8 @@ namespace CyberCar {
  }
  float d=RoadDistance(x,z,out float roadHeight,out float bridgeDepth);float half=graph.RoadWidth/2;
  if(d<half+55){float shoulder=Mathf.Clamp01((d-half-10)/45);baseHeight=Mathf.Lerp(roadHeight-.4f-bridgeDepth,baseHeight,Mathf.SmoothStep(0,1,shoulder));}
+ Vector3 fork=graph.Nodes[graph.Columns-1];
+ if(x>fork.x+34&&Mathf.Abs(z-fork.z)<26){float cut=Mathf.SmoothStep(0,1,(x-fork.x-34)/6)*Mathf.SmoothStep(0,1,(26-Mathf.Abs(z-fork.z))/4);baseHeight=Mathf.Lerp(baseHeight,-85,cut);}
  return baseHeight;
  }
  float RoadDistance(float x,float z,out float height,out float bridgeDepth){

@@ -14,6 +14,8 @@ namespace CyberCar {
  for(int i=4;i<path.Length-2;i+=8){
  Vector3 forward=(path[i+1]-path[i-1]).normalized,side=Vector3.Cross(Vector3.up,forward).normalized;
  int sign=(i+e.x)%2==0?1:-1;Vector3 position=path[i]+side*sign*(world.Network.RoadWidth/2+2);
+ float ground=world.GroundHeight(position);float bottom=Mathf.Min(ground,position.y-.4f);float footingHeight=Mathf.Max(.4f,position.y-bottom+.05f);
+ world.Box("Streetlamp anchored footing",new Vector3(position.x,bottom+footingHeight/2,position.z),new Vector3(1.2f,footingHeight,1.2f),world.PlayerPaint);
  world.Photos.Prop("StreetLamp",position,8,Mathf.Atan2(-side.x*sign,-side.z*sign)*Mathf.Rad2Deg);
  var o=new GameObject("Streetlight pool");o.transform.SetParent(transform);o.transform.position=position+Vector3.up*7.1f;o.transform.rotation=Quaternion.Euler(90,0,0);
  var light=o.AddComponent<Light>();light.type=LightType.Spot;light.spotAngle=120;light.innerSpotAngle=65;light.range=34;light.intensity=1.7f;light.color=new Color(1,.8f,.55f);light.shadows=LightShadows.None;light.enabled=false;

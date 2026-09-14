@@ -6,6 +6,7 @@ namespace CyberCar {
  public Transform Beacon{get;private set;} public Transform Secret{get;private set;}
  public readonly List<CrossingSite> Crossings=new List<CrossingSite>();
  public PhotographicMaterials Photos{get;private set;} public WorldEnvironment Environment{get;private set;}
+ readonly List<Vector3> signBases=new List<Vector3>();readonly List<Transform> palmRoots=new List<Transform>();
  readonly List<Object> owned=new List<Object>();Material road,concrete,cyan,amber,white,steel,rock,sand,leaves;
  public Material Mat(string name,Color color,float metal=0,bool emission=false){var m=new Material(Shader.Find("Standard")){name=name,color=color,enableInstancing=true};m.SetFloat("_Metallic",metal);m.SetFloat("_Glossiness",.25f);if(emission){m.EnableKeyword("_EMISSION");m.SetColor("_EmissionColor",color);}owned.Add(m);return m;}
  public GameObject Box(string name,Vector3 p,Vector3 scale,Material mat,bool solid=true){var o=GameObject.CreatePrimitive(PrimitiveType.Cube);o.name=name;o.transform.SetParent(transform,false);o.transform.position=p;o.transform.localScale=scale;o.GetComponent<Renderer>().sharedMaterial=mat;if(!solid)Destroy(o.GetComponent<Collider>());return o;}
@@ -23,7 +24,13 @@ namespace CyberCar {
  road=Mat("Asphalt",new Color(.1f,.11f,.12f));concrete=Mat("Concrete",new Color(.4f,.41f,.4f));cyan=Mat("GPS",new Color(.04f,.7f,.6f),.1f,true);amber=Mat("Warning",new Color(.95f,.56f,.12f));white=Mat("Markings",new Color(.75f,.73f,.66f));steel=Mat("Steel",new Color(.17f,.2f,.23f),.65f);rock=Mat("Rock",new Color(.42f,.32f,.24f));sand=Mat("Beach sand",new Color(.66f,.55f,.36f));leaves=Mat("Palm leaves",new Color(.13f,.23f,.08f));
  PlayerPaint=Mat("Player paint",new Color(.03f,.27f,.3f),.7f);EnemyPaint=Mat("Enemy paint",new Color(.5f,.045f,.03f),.6f);TrafficPaint=Mat("Traffic paint",new Color(.55f,.59f,.62f),.4f);
  var sun=new GameObject("Daylight");sun.transform.SetParent(transform);sun.transform.rotation=Quaternion.Euler(42,-30,0);var light=sun.AddComponent<Light>();light.type=LightType.Directional;light.intensity=1.1f;light.shadows=LightShadows.Soft;
- if(map==0)Box("City foundation",new Vector3(size/2,-2.6f,size/2),new Vector3(size+300,4,size+300),concrete);
+ if(map==0){
+ float cut=Network.Nodes[Network.Columns-1].x+38,z=Network.Nodes[Network.Columns-1].z;
+ Box("City foundation",new Vector3((cut-150)/2,-2.6f,size/2),new Vector3(cut+150,4,size+300),concrete);
+ float outer=size+150;
+ Box("North foundation",new Vector3((cut+outer)/2,-2.6f,(z+23+outer)/2),new Vector3(outer-cut,4,outer-z-23),concrete);
+ Box("South foundation",new Vector3((cut+outer)/2,-2.6f,(z-23-150)/2),new Vector3(outer-cut,4,z-23+150),concrete);
+ }
  if(map==1||map==3)Coast(map,size);
  foreach(var node in Network.Nodes)Box("Intersection",node-Vector3.up*.3f,new Vector3(w+2,.6f,w+2),road);
  int edgeIndex=0;
@@ -33,7 +40,7 @@ namespace CyberCar {
  Vector3 a=path[i-1],b=path[i],f=(b-a).normalized,side=Vector3.Cross(Vector3.up,f).normalized,mid=(a+b)/2;
  if(i>3&&i<path.Length-3){if(i%2==0)Segment("Center dash",mid-f*1.5f+Vector3.up*.035f,mid+f*1.5f+Vector3.up*.035f,.15f,.018f,white);
  foreach(int sign in new[]{-1,1}){Segment("Edge line",a+side*sign*(w/2-1)+Vector3.up*.025f,b+side*sign*(w/2-1)+Vector3.up*.025f,.12f,.018f,white);
- if(map>=2||Network.IsBridge(e.x,e.y)){Segment("Guardrail",a+side*sign*(w/2+.25f)+Vector3.up*.75f,b+side*sign*(w/2+.25f)+Vector3.up*.75f,.22f,.4f,steel,true);Box("Guardrail post",mid+side*sign*(w/2+.25f)+Vector3.up*.45f,new Vector3(.16f,.9f,.16f),steel,false);}
+ if(Network.IsBridge(e.x,e.y)||(map>=2&&(e.x+e.y)%3==0)){Segment("Guardrail",a+side*sign*(w/2+.25f)+Vector3.up*.75f,b+side*sign*(w/2+.25f)+Vector3.up*.75f,.22f,.4f,steel,true);Box("Guardrail post",mid+side*sign*(w/2+.25f)+Vector3.up*.45f,new Vector3(.16f,.9f,.16f),steel,false);}
  else if(map==0)Segment("Sidewalk",a+side*sign*(w/2+1.3f),b+side*sign*(w/2+1.3f),2.3f,.2f,concrete);
  }}
  }
@@ -60,14 +67,18 @@ namespace CyberCar {
  }
  }
  foreach(int n in Network.Hotspots){Vector3 p=Network.Nodes[n];Box("Interchange apron",p-Vector3.up*(map>=2?.9f:.35f),new Vector3(w+14,.5f,w+14),road,map<2);Sign(p+new Vector3(-w,0,-14),"TRAFFIC CONTROL",cyan);}
- Vector3 fork=Network.Nodes[Network.Columns-1];Segment("Untrusted service road",fork-Vector3.up*.3f,Network.Hazard-Vector3.up*.3f,11,.6f,road,true);
- if(map==0)Box("Service road barrier",Network.Hazard+Vector3.up*1.5f,new Vector3(2,3,14),amber);
- Sign(fork+new Vector3(17,0,-8),map==0?"ROAD CLOSED":"BRIDGE OUT",amber);
+ Vector3 fork=Network.Nodes[Network.Columns-1];Segment("Untrusted service road",fork-Vector3.up*.3f,fork+Vector3.right*40-Vector3.up*.3f,11,.6f,road,true);
+ foreach(int side in new[]{-1,1})Segment("Broken bridge rail",fork+new Vector3(15,.8f,side*5.6f),fork+new Vector3(39,.8f,side*5.6f),.25f,.5f,steel,true);
+ Box("Exposed bridge support",fork+new Vector3(35,-4,0),new Vector3(2,7.4f,8),concrete);
+ Sign(fork+new Vector3(17,0,-8),"BRIDGE OUT / NO ENTRY",amber);
  Sign(Network.Nodes[0]+new Vector3(-10,0,10),"OPERATIONS",cyan);Sign(Network.Nodes[Network.Finish]+new Vector3(12,0,10),Network.Names[Network.Finish].ToUpper(),cyan);
  if(map==3){Vector3 p=Network.Nodes[Network.Finish]+new Vector3(26,0,22);Box("Lighthouse foundation",p-Vector3.up,new Vector3(38,2,38),concrete);var tower=GameObject.CreatePrimitive(PrimitiveType.Cylinder);tower.transform.SetParent(transform);tower.transform.position=p+Vector3.up*12;tower.transform.localScale=new Vector3(8,12,8);tower.GetComponent<Renderer>().sharedMaterial=white;Box("Lighthouse lantern",p+Vector3.up*25,new Vector3(6,3,6),cyan,false);}
  var beacon=GameObject.CreatePrimitive(PrimitiveType.Cylinder);beacon.name="GPS target";beacon.transform.SetParent(transform);beacon.transform.localScale=new Vector3(7,.05f,7);beacon.GetComponent<Renderer>().sharedMaterial=cyan;Destroy(beacon.GetComponent<Collider>());Beacon=beacon.transform;
  gameObject.AddComponent<VisualUpgrade>().Apply(this);
  if(map>0)gameObject.AddComponent<NaturalLandscape>().Build(this);
+ foreach(var palm in palmRoots){var basePoint=palm.position;float h=GroundHeight(basePoint);palm.position=new Vector3(basePoint.x,h,basePoint.z);}
+ foreach(var basePoint in signBases){float ground=GroundHeight(basePoint);if(basePoint.y>ground)Box("Sign anchored footing",new Vector3(basePoint.x,(basePoint.y+ground)/2,basePoint.z),new Vector3(.5f,basePoint.y-ground+.15f,.5f),concrete);}
+ gameObject.AddComponent<TrafficSignals>().Build(this);
  Environment=gameObject.AddComponent<WorldEnvironment>();Environment.Build(this);
  }
  void Coast(int map,float size) {
@@ -83,6 +94,7 @@ namespace CyberCar {
  }
  }
  void Palm(Vector3 p,float height,float phase){
+ int childStart=transform.childCount;
  Vector3 top=p+new Vector3(Mathf.Sin(phase)*1.5f,height,Mathf.Cos(phase));Vector3 previous=p;
  for(int i=1;i<=6;i++){float t=i/6f;Vector3 next=Vector3.Lerp(p,top,t)+Vector3.right*Mathf.Sin(t*Mathf.PI)*.55f;Segment("Palm trunk",previous,next,.32f-t*.12f,.32f-t*.12f,rock);previous=next;}
  var vertices=new List<Vector3>();var indices=new List<int>();
@@ -92,8 +104,14 @@ namespace CyberCar {
  }
  int frontVertices=vertices.Count,frontIndices=indices.Count;vertices.AddRange(vertices.ToArray());for(int i=0;i<frontIndices;i+=3)indices.AddRange(new[]{indices[i+2]+frontVertices,indices[i+1]+frontVertices,indices[i]+frontVertices});
  var mesh=new Mesh{name="Arching palm crown"};mesh.SetVertices(vertices);mesh.SetTriangles(indices,0);mesh.RecalculateNormals();owned.Add(mesh);var crown=new GameObject("Palm fronds");crown.transform.SetParent(transform);crown.AddComponent<MeshFilter>().sharedMesh=mesh;crown.AddComponent<MeshRenderer>().sharedMaterial=leaves;
+ var parts=new List<Transform>();for(int i=childStart;i<transform.childCount;i++)parts.Add(transform.GetChild(i));var root=new GameObject("Grounded palm").transform;root.SetParent(transform);root.position=p;foreach(var part in parts)part.SetParent(root,true);palmRoots.Add(root);
  }
- void Sign(Vector3 p,string value,Material mat){Box("Sign post",p+Vector3.up*2,new Vector3(.2f,4,.2f),steel,false);Box("Sign board",p+Vector3.up*4,new Vector3(11,2,.16f),steel,false);var o=new GameObject(value);o.transform.SetParent(transform);o.transform.position=p+new Vector3(0,4,-.1f);o.transform.rotation=Quaternion.Euler(0,180,0);var t=o.AddComponent<TextMesh>();t.text=value;t.anchor=TextAnchor.MiddleCenter;t.fontSize=48;t.characterSize=.085f;t.color=mat.color;}
+ public void Sign(Vector3 p,string value,Material mat){signBases.Add(p);if(GetComponent<NaturalLandscape>()){float ground=GroundHeight(p);if(p.y>ground)Box("Sign footing",new Vector3(p.x,(p.y+ground)/2,p.z),new Vector3(.5f,p.y-ground+.15f,.5f),steel);}
+ Box("Sign post",p+Vector3.up*2,new Vector3(.2f,4,.2f),steel,false);Box("Sign board",p+Vector3.up*4,new Vector3(11,2,.16f),steel,false);var o=new GameObject(value);o.transform.SetParent(transform);o.transform.position=p+new Vector3(0,4,-.1f);o.transform.rotation=Quaternion.identity;var t=o.AddComponent<TextMesh>();t.text=value;t.anchor=TextAnchor.MiddleCenter;t.fontSize=48;t.characterSize=.085f;t.color=mat.color;}
+ public float GroundHeight(Vector3 p){var terrain=GetComponent<NaturalLandscape>();return terrain?terrain.Height(p.x,p.z):-.6f;}
+ public bool InFatalZone(Vector3 p){Vector3 fork=Network.Nodes[Network.Columns-1];return p.x>fork.x+39&&Mathf.Abs(p.z-fork.z)<22&&p.y<fork.y-1.5f||p.x< -295||p.z< -295||p.x>Network.Size+420||p.z>Network.Size+420;}
+ public bool FatalFall(Vector3 p){Vector3 fork=Network.Nodes[Network.Columns-1];return InFatalZone(p)&&p.y<fork.y-14||p.y<(Network.Map==3?-33:Network.Map==1?-8:Network.Map==2?-28:-12);}
+ public void AddDestinationSigns(){foreach(int n in Network.Hotspots)Sign(Network.Nodes[n]+new Vector3(14,0,14),Network.Names[n].ToUpper(),cyan);}
  public void CreateSecret(){var o=GameObject.CreatePrimitive(PrimitiveType.Cube);o.name="Hidden encrypted cache";o.transform.SetParent(transform);o.transform.position=Network.Nodes[Network.Columns*2]+new Vector3(5,1.4f,5);o.transform.localScale=Vector3.one*1.3f;o.GetComponent<Renderer>().sharedMaterial=amber;Destroy(o.GetComponent<Collider>());Secret=o.transform;}
  public static void Sparks(Vector3 point){var o=new GameObject("Impact sparks");o.transform.position=point;var p=o.AddComponent<ParticleSystem>();p.Stop();var m=p.main;m.duration=.4f;m.loop=false;m.startLifetime=.45f;m.startSpeed=6;m.startSize=.12f;m.startColor=new Color(1,.6f,.2f);m.gravityModifier=1.5f;var e=p.emission;e.rateOverTime=0;e.SetBursts(new[]{new ParticleSystem.Burst(0,22)});p.GetComponent<ParticleSystemRenderer>().sharedMaterial=Resources.Load<Material>("Impact");p.Play();Destroy(o,1);}
  void OnDestroy(){foreach(var obj in owned)if(obj)Destroy(obj);}

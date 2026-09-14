@@ -21,3 +21,6 @@ Unity imports 2K surface maps and sky panoramas; model textures are 1K. Normal m
 Coastal Drive is an original 64-second, 120 BPM synthesized instrumental loop. ArtSource/create_music.py uses mathematical oscillators and seeded noise, without third-party samples or compositions. VehicleFeedback synthesizes the tire-friction loop. No third-party music attribution or purchased music rights are involved.
 
 First-party source is supplied with the project; no blanket public repository license is assigned here. Unity runtime and built-in resources retain their applicable Unity terms. Binary source assets use the repository's Git LFS configuration.
+
+
+September 14: DriveMusic synthesizes the duck-like media-injection loop locally with sine harmonics and a reed envelope. No sample recordings or new external assets were used.
