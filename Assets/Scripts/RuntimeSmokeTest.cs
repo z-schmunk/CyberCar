@@ -22,6 +22,7 @@ namespace CyberCar
         IEnumerator Start()
         {
             yield return null;Session.InputEnabled=false;
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-uiTest")>=0){yield return VisualProof();yield return UiProof();Debug.Log("UI_VISUAL_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-expansionTest")>=0){yield return ExpansionProof();Debug.Log("EXPANSION_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bridgeTest")>=0){yield return BridgeProof();Application.Quit(0);yield break;}
             Session.SelectLevel(0);Session.Begin();
@@ -146,9 +147,43 @@ namespace CyberCar
             if(screenshot){File.WriteAllBytes(Path.Combine(Application.dataPath,"..","smoke-menu.png"),screenshot.EncodeToPNG());Destroy(screenshot);}
             Session.ShowAchievements();yield return new WaitForEndOfFrame();
             screenshot=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(Path.Combine(Application.dataPath,"..","smoke-achievements.png"),screenshot.EncodeToPNG());Destroy(screenshot);
+            yield return VisualProof();yield return UiProof();
             Check(runtimeErrors==0,"No runtime errors or exceptions");
             File.WriteAllText(Path.Combine(Application.dataPath,"..","smoke-results.txt"),"PASS: "+checks+" checks\nPhysics, car collisions, thirteen staged attacks/defenses, drifting, pedestrian safety, four maps, curved bridge driving, extreme eligibility, save recovery, field guide, soundtrack, win/fail lifecycle, zero runtime errors.\n");
             Debug.Log("CYBERCAR_SMOKE_SUCCESS / "+checks);Application.Quit(0);
+        }
+        IEnumerator VisualProof(){
+            Session.Prepare(7,3,1,true);Session.Begin();yield return new WaitForSeconds(1.5f);
+            var source=Resources.Load<GameObject>("Art/CyberInterceptor");int meshes=source.GetComponentsInChildren<MeshFilter>().Length;
+            Check(meshes<=20&&meshes>=4,"Detailed Blender car retains a bounded mesh count");
+            int wheels=0;foreach(var t in Session.Player.GetComponentsInChildren<Transform>())if(t.name=="Animated wheel")wheels++;
+            Check(wheels==4,"New car retains four independently animated wheel pivots");
+            var reflection=Session.World.GetComponentInChildren<SceneReflections>();Check(reflection!=null&&reflection.Captures>0,"Reflection probe captures the completed environment");
+            bool blend=false;foreach(var renderer in Session.World.GetComponentsInChildren<Renderer>())foreach(var material in renderer.sharedMaterials)if(material&&material.shader.name=="CyberCar/LandscapeBlend")blend=true;
+            Check(blend,"Mountain terrain uses slope-blended ground and rock");
+            yield return Capture("realism-cliffs.png");
+            Session.SelectLevel(5);Session.Begin();yield return new WaitForSeconds(1.5f);yield return Capture("realism-city.png");
+            Session.SelectLevel(8);Session.Begin();yield return new WaitForSeconds(1.5f);yield return Capture("realism-night.png");
+        }
+        IEnumerator CheckUi(string name){
+            yield return new WaitForEndOfFrame();var hud=Session.GetComponent<GameHud>();
+            if(hud.LayoutIssues.Count>0)Debug.Log("UI_LAYOUT_DETAIL / "+string.Join(" | ",hud.LayoutIssues));
+            Check(hud.LayoutIssues.Count==0,"UI text and controls fit: "+name);
+            var shot=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(Path.Combine(Application.dataPath,"..","ui-"+name+".png"),shot.EncodeToPNG());Destroy(shot);
+        }
+        IEnumerator UiProof(){
+            var hud=Session.GetComponent<GameHud>();
+            foreach(var size in new[]{new Vector2Int(1280,720),new Vector2Int(1024,768),new Vector2Int(1920,1080)}){
+                Screen.SetResolution(size.x,size.y,FullScreenMode.Windowed);yield return new WaitForSecondsRealtime(.6f);string prefix=size.x+"x"+size.y+"-";
+                Session.Menu();hud.ShowGarage(false);yield return CheckUi(prefix+"menu");
+                hud.ShowGarage(true);yield return CheckUi(prefix+"garage");hud.ShowGarage(false);
+                Session.SelectLevel(14);yield return CheckUi(prefix+"briefing");Session.Begin();yield return CheckUi(prefix+"driving");
+                Session.Attacks.Launch(CyberAttack.Ransomware);Session.Attacks.Launch(CyberAttack.SensorAttack);Session.Attacks.Launch(CyberAttack.MusicInjection);Session.Defense.Begin(3);Session.Defense.Choose(Session.Defense.EvidenceAnswer);Session.Defense.Choose(Session.Defense.EvidenceAnswer);yield return CheckUi(prefix+"diagnostic");
+                Session.SetGuide(true);hud.ShowGuideTopic(7);yield return CheckUi(prefix+"guide");Session.SetGuide(false);
+                for(int i=0;i<AttackDirector.Count;i++)Session.Attacks.Launch((CyberAttack)i);Session.Finish(true,"Visual report review");yield return CheckUi(prefix+"report");
+                Session.ShowAchievements();yield return CheckUi(prefix+"achievements");
+            }
+            Screen.SetResolution(1440,900,FullScreenMode.Windowed);yield return new WaitForSecondsRealtime(.5f);Session.Menu();
         }
         bool Solve(int attack){Session.Defense.Begin(attack);bool result=false;for(int i=0;i<3;i++)result=Session.Defense.Choose(Session.Defense.EvidenceAnswer);return result;}
         IEnumerator ExpansionProof(){

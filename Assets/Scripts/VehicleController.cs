@@ -40,7 +40,7 @@ namespace CyberCar
         }
         public void SetupVisual(Material paint)
         {
-            var model=Resources.Load<GameObject>("Art/CyberInterceptor");
+            var model=Resources.Load<GameObject>(IsPlayer?"Art/CyberInterceptor":"Art/CyberInterceptorTraffic");
             if(model!=null)
             {
                 visual=Instantiate(model,transform).transform;visual.localPosition=Vector3.zero;modelYaw=180;
@@ -64,6 +64,13 @@ namespace CyberCar
                 visual=GameObject.CreatePrimitive(PrimitiveType.Cube).transform;visual.SetParent(transform,false);
                 visual.localPosition=Vector3.up*.8f;visual.localScale=new Vector3(2.1f,.8f,4.5f);
                 Destroy(visual.GetComponent<Collider>());visual.GetComponent<Renderer>().sharedMaterial=paint;
+            }
+            foreach(var part in GetComponentsInChildren<Transform>())part.gameObject.layer=8;
+            foreach(var renderer in GetComponentsInChildren<Renderer>())foreach(var material in renderer.sharedMaterials){
+                if(!material)continue;string name=material.name;
+                if(name.Contains("Glass")){material.SetFloat("_Metallic",.42f);material.SetFloat("_Glossiness",.94f);material.color=new Color(.025f,.047f,.063f);}
+                else if(name.Contains("Alloy")){material.SetFloat("_Metallic",.92f);material.SetFloat("_Glossiness",.79f);}
+                else if(name.Contains("Rubber")){material.SetFloat("_Metallic",0);material.SetFloat("_Glossiness",.13f);}
             }
             gameObject.AddComponent<VehicleFeedback>().Initialize(this);
             if(IsPlayer)

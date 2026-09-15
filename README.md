@@ -6,7 +6,7 @@ Windows driving and cybersecurity learning adventure, built with Unity 6000.6.0f
 
 Run `Builds/Windows/CyberCarGame.exe` and keep its folder together. Fifteen story operations lead from courier training to a combined-attack coastal mission. Completing the campaign unlocks freeplay; previously unlocked freeplay remains available. The garage and local attacker training lab are accessible from the menu.
 
-Follow the circular, heading-up GPS road map and its solid direction arrow. Gray roads remain visible during communication failures. Teal marks the dispatch route; a compromised route is coral. The next-turn instruction appears below the map. World-space GPS markers and traffic dots have been removed.
+Follow the circular, heading-up GPS road map and its solid direction arrow. Gray roads remain visible during communication failures. Teal marks the dispatch route; a compromised route is coral. During driving, only active threat controls appear, with larger labels. After-action reports paginate encountered attacks using larger text. The next-turn instruction appears below the map. World-space GPS markers and traffic dots have been removed.
 
 | Controls | Action |
 |---|---|
@@ -46,7 +46,7 @@ Story routes pass named response locations and finish at a fixed dispatch destin
 
 ## Roads, vehicles and communications
 
-Four environments: Neon District, Container Harbor, Red Rock Pass, Beach Cliffs. Mixed straight and curved roads, bridges, accessible off-road terrain, ocean/coast, and photographed day/night skies. Extreme uses 81 junctions. City traffic observes a 25 mph limit, alternating one-way corridors, traffic signals and crosswalks. Harbor traffic is slower than rural traffic.
+Four environments: Neon District, Container Harbor, Red Rock Pass, Beach Cliffs. Mountains blend rock and ground by slope; roadside grasses break up bare shoulders. Ocean shading includes shallow-water color, smaller ripples and shoreline foam. Environment reflections refresh after world construction, movement and lighting changes. Mixed straight and curved roads, bridges, accessible off-road terrain, ocean/coast, and photographed day/night skies. Extreme uses 81 junctions. City traffic observes a 25 mph limit, alternating one-way corridors, traffic signals and crosswalks. Harbor traffic is slower than rural traffic.
 
 Ordinary traffic spawns in three-car groups, shares destinations and leaves following gaps. Wrong-way enemies, collisions and replayed braking can create physical queues. AI vehicles have a software road envelope; there are no invisible player-only walls. Collision audits check visible world geometry and clear driving lanes. Streetlamps have visible footings and palms are grounded to the landscape.
 
@@ -70,7 +70,7 @@ The local lab drives a courier with AI while you spend twelve points on attacks 
 
 ## Assets and project
 
-CC0 Poly Haven PBR surfaces, panoramas, rock, pine and streetlamp models were verified and processed through Blender. Original sources, hashes and author credits are retained under `ArtSource/Vendor` and `Docs/PolyHavenManifest.json`. The car and buildings remain stylized. Original generated synthwave music and synthesized duck/tire/engine audio contain no third-party recordings.
+CC0 Poly Haven PBR surfaces, panoramas, rock, pine and streetlamp models were verified and processed through Blender. Original sources, hashes and author credits are retained under `ArtSource/Vendor` and `Docs/PolyHavenManifest.json`. The car now uses curved Blender coachwork, detailed tire tread, rims, brake hardware, mirrors and glazing. The player mesh has 78,428 triangles; traffic uses a 23,716-triangle derivative. Both retain thirteen mesh objects. Building glass has mullions, varied panes and night windows, with additional entrances and neighborhood buildings. These remain authored game assets rather than a claim of full photorealism. Original generated synthwave music and synthesized duck/tire/engine audio contain no third-party recordings.
 
 Canonical project: `C:/Users/schmu/unityProjects/CyberCarGame`. GitHub Desktop's existing `C:/Users/schmu/AndroidStudioProjects/CyberCar` directory junction points here. Remote: `https://github.com/z-schmunk/CyberCar.git`. Changes remain uncommitted and unpushed.
 
@@ -81,5 +81,7 @@ Canonical project: `C:/Users/schmu/unityProjects/CyberCarGame`. GitHub Desktop's
 - `Backups`: verified source archive and pre-change snapshots.
 - `Tools/PackageSource.py`: refreshes and verifies the portable source zip.
 - `Logs`: build and runtime evidence; `Launchers`: local shortcuts.
+
+The latest original car source is `ArtSource/create_car_realistic.py` and `CyberInterceptor-Realism.blend`; `create_traffic_lod.py` derives the traffic mesh. The original earlier car source is retained. Blender studio preview and asset receipts are under `ArtSource` and `Docs`.
 
 Use **CyberCar > Build Windows game** in Unity or `CyberCar.Editor.ProjectBuilder.Build` in batch mode. The builder regenerates the launch scene; preserve custom scenes separately. `-smokeTest` runs automated regression checks without writing real progression. See `Docs/Validation.md` for the exact verified build and limitations.

@@ -1,4 +1,4 @@
-# Asset provenance — 2026-09-11
+# Asset provenance â€” 2026-09-11
 
 The star overlay is procedural and does not reproduce an astronomical star catalogue.
 
@@ -24,3 +24,10 @@ First-party source is supplied with the project; no blanket public repository li
 
 
 September 14: DriveMusic synthesizes the duck-like media-injection loop locally with sine harmonics and a reed envelope. No sample recordings or new external assets were used.
+
+
+## September 15 realism pass
+
+Original Blender geometry: `ArtSource/create_car_realistic.py`, saved as `CyberInterceptor-Realism.blend`. The game imports the updated `Resources/Art/CyberInterceptor.fbx`. `create_traffic_lod.py` derives `CyberInterceptorTraffic.fbx` from the same authored source. High-detail mesh: 78,428 triangles / 13 objects. Traffic: 23,716 triangles. Bounds, hashes and source declarations are recorded in `RealismCarReceipt.json` and `TrafficCarReceipt.json`. The studio preview was rendered in Blender Cycles and is not a Unity screenshot.
+
+No new downloads, paid services or third-party models were used. Existing verified Poly Haven textures supply slope-dependent ground/rock shading. Roadside grass, architectural glazing, neighborhood blocks and water shading are original project geometry/shaders. Existing CC0 licenses remain unchanged.

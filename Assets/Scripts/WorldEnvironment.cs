@@ -23,7 +23,7 @@ namespace CyberCar {
  }}
  }
  public void Configure(GameSession game,bool night){
- session=game;Night=night;if(sky)Destroy(sky);
+ session=game;Night=night;Shader.SetGlobalFloat("_CyberNight",night?1:0);var reflection=world.GetComponentInChildren<SceneReflections>();if(reflection)reflection.Initialize(game);if(sky)Destroy(sky);
  var template=Resources.Load<Material>(night?"NightSky":"DaySky");if(!template)throw new System.InvalidOperationException("Missing panorama sky material");
  sky=new Material(template);RenderSettings.skybox=sky;
  sun.intensity=night?.09f:1.1f;sun.color=night?new Color(.52f,.64f,1):new Color(1,.95f,.87f);sun.transform.rotation=Quaternion.Euler(night?36:48,night?-65:-32,0);

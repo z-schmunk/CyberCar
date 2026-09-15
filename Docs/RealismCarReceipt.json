@@ -1,0 +1,21 @@
+{
+  "triangles": 78428,
+  "mesh_objects": 13,
+  "bounds_xyz_m": [
+    [
+      -1.3250000476837158,
+      1.3250000476837158
+    ],
+    [
+      -2.4200000762939453,
+      2.36899995803833
+    ],
+    [
+      0.019999995827674866,
+      1.7000000476837158
+    ]
+  ],
+  "fbx_sha256": "c296b0ba31cbcb342cb7c37dcd2d9e6b07f93027484b64c5e1842859e43a70d8",
+  "source": "Original procedural Blender geometry; no external asset",
+  "date": "2026-09-15"
+}

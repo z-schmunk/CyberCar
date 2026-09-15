@@ -32,7 +32,7 @@ namespace CyberCar
             int map=world.Network.Map;
             var asphalt=world.Photos.Surface("asphalt_02",4);
             var paving=Detail("Concrete joints",new Color(.46f,.45f,.42f),2,4);
-            var facade=Detail("Glazed building facade",Color.white,1,13,.65f);
+            var facade=new Material(Resources.Load<Shader>("ArchitecturalGlass")){name="Architectural glazing and mullions"};owned.Add(facade);
             var rock=world.Photos.Surface("rocky_terrain_02",6);
             var ground=world.Photos.Surface("grass_path_2",5);
             var sand=world.Photos.Surface("aerial_beach_02",6);
@@ -44,7 +44,7 @@ namespace CyberCar
                 else if(n=="Sidewalk"||n=="Cargo island"||n=="Bridge pier")renderer.sharedMaterial=paving;
                 else if(n=="Canyon mesa"||n=="Canyon floor"||n=="Coastal escarpment"||n=="Shore boulder")renderer.sharedMaterial=rock;
                 else if(n=="Beach")renderer.sharedMaterial=sand;
-                else if(n=="City foundation")renderer.sharedMaterial=ground;
+                else if(n=="City foundation"||n=="North foundation"||n=="South foundation")renderer.sharedMaterial=paving;
                 else if(n=="Window ribbon"||n=="Perimeter glazing")renderer.enabled=false;
                 else if(n=="Harbor water")
                 {
@@ -60,9 +60,24 @@ namespace CyberCar
             // A local reflection capture supplies actual surroundings to the metallic car paint.
             var probeObject=new GameObject("Environment reflection");probeObject.transform.SetParent(world.transform);probeObject.transform.position=new Vector3(30,5,10);
             var probe=probeObject.AddComponent<ReflectionProbe>();probe.mode=ReflectionProbeMode.Realtime;probe.refreshMode=ReflectionProbeRefreshMode.ViaScripting;probe.timeSlicingMode=ReflectionProbeTimeSlicingMode.AllFacesAtOnce;
-            probe.resolution=128;probe.size=new Vector3(2200,200,2200);probe.boxProjection=false;probe.clearFlags=ReflectionProbeClearFlags.Skybox;probe.RenderProbe();
+            probe.resolution=128;probe.size=new Vector3(2200,200,2200);probe.boxProjection=false;probe.clearFlags=ReflectionProbeClearFlags.Skybox;probeObject.AddComponent<SceneReflections>();
             world.PlayerPaint.color=new Color(.035f,.22f,.25f);world.PlayerPaint.SetFloat("_Glossiness",.86f);world.PlayerPaint.SetFloat("_Metallic",.72f);
             world.EnemyPaint.SetFloat("_Glossiness",.78f);world.TrafficPaint.SetFloat("_Glossiness",.72f);
+            // Building details sit inside existing building footprints, clear of traffic lanes.
+            var buildings=new List<Transform>();foreach(var renderer in world.GetComponentsInChildren<MeshRenderer>())if(renderer.name=="Office block")buildings.Add(renderer.transform);
+            foreach(var building in buildings){Vector3 center=building.position;Vector3 size=building.localScale;float roofY=center.y+size.y/2;
+                world.Box("Building plinth",new Vector3(center.x,-.3f,center.z),new Vector3(size.x+1,.62f,size.z+1),paving);
+                world.Box("Entrance canopy",new Vector3(center.x,3.8f,center.z-size.z/2-.3f),new Vector3(9,.25f,2.5f),world.TrafficPaint,false);
+                world.Box("Entry glazing",new Vector3(center.x,1.75f,center.z-size.z/2-.045f),new Vector3(4.5f,3.5f,.05f),facade,false);
+                for(int sign=-1;sign<=1;sign+=2)world.Box("Roof parapet",new Vector3(center.x+sign*(size.x/2-.2f),roofY+.35f,center.z),new Vector3(.4f,.7f,size.z),paving,false);
+                world.Box("Rooftop duct",new Vector3(center.x+9,roofY+.8f,center.z-6),new Vector3(6,1.6f,3),paving,false);
+            }
+            if(map==0){for(int n=0;n<world.Network.Columns;n++){
+                float x=35+n*86,height=9+(n%3)*5;
+                world.Box("Outer neighborhood",new Vector3(x,height/2-.3f,-54),new Vector3(53,height,39),facade);
+                world.Box("Neighborhood roof",new Vector3(x,height-.2f,-54),new Vector3(54,.35f,40),paving,false);
+                if(n>0)world.Box("West neighborhood",new Vector3(-58,height/2-.3f,x),new Vector3(38,height,52),facade);
+            }}
             // Road furniture uses the same graph as gameplay and stays outside driveable lanes.
             foreach(var edge in world.Network.Edges)
             {

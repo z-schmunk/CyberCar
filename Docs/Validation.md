@@ -1,32 +1,28 @@
-# Validation — September 14, 2026
+# Validation — September 15, 2026
 
-Final Windows development build: Unity 6000.6.0f1, built-in renderer, x64 Mono.
+**160 automated checks passed** in the exact delivered Windows build. No runtime errors or exceptions, C# compilation errors/warnings, or shader errors were observed. `git diff --check` passed.
 
-**PASS: 132 automated runtime checks.** No runtime errors or exceptions were observed. The final build completed successfully with no C# compilation warnings or errors. `git diff --check` passed.
+- Build: `Logs/RealismBuild2.log`, Unity 6000.6.0f1, Windows x64 Mono development build; 276,303,694 bytes reported by Unity.
+- Full run: `Logs/RealismFinalRuntime.log` ends with `CYBERCAR_SMOKE_SUCCESS / 160`.
+- Focused visual/UI run: `Logs/RealismUi2.log`, 28 checks passed.
+- Car production: `Logs/RealismCarFinal.log`, `Docs/RealismCarReceipt.json` and `Docs/TrafficCarReceipt.json`. Blender production passed geometry bounds/triangle/object limits. Blender reported forward-looking API deprecation warnings, not export failures.
 
-Evidence:
-- `Logs/StoryFinalBuild2.log`: exact delivered build, 273,579,032 bytes reported by Unity.
-- `Logs/StoryFinalRuntime.log`: full final regression and success marker.
-- `Builds/Windows/smoke-results.txt`: portable summary.
-- `Builds/Windows/smoke-*.png` and `bridge-probe.png`: actual executable captures.
+## Gameplay regression
 
-## Coverage
+The prior 132 checks still pass: physical driving, collisions and momentum transfer, drifting, reverse motion, curved bridge traversal, actual bridge falls, off-road suspension, automatic rollover recovery, visible world-collider audits and clear sampled lanes across four maps. They also cover thirteen staged cyber defenses, RSU range/fallback, sensor obstacles, wrong answers, one-way routing, traffic signal phases, AI containment, local attacker budget and an actual AI courier delivery, story graph destinations, persistence and backup recovery, pedestrians, Extreme eligibility and day/night lighting behavior. Campaign completion checks include checkpoint teleportation; they are not all full driving playthroughs.
 
-- Real acceleration, braking, momentum-transfer collisions, drift/slip and reverse motion.
-- Four visible-world material/collider audits and sampled lane-clearance checks across every generated road edge; four map delivery completions use checkpoint teleportation.
-- Physical traversal of a curved elevated beach-cliff bridge, off-road mountain driving with pitch changes, an actual broken-bridge fall, and an overturned car's recorded automatic recovery.
-- All thirteen attack activations and successful staged defenses, rejected direct one-call bypass, wrong-answer penalty, simultaneous threats, and defense cooldown behavior.
-- RSU contact in range, contact loss outside range, blocked out-of-range handshakes, satellite fallback after returning to coverage, and saved-route validation.
-- Visible obstacle measurements from virtual car sensors and injected phantom range readings.
-- Directed one-way routing, traffic signal phase priority, and AI return to the road envelope.
-- Local attacker launch budget and an unattacked AI courier physically completing a delivery route.
-- Every story mission reaches its named destination through legal graph edges; newest threat introductions, pause/guide behavior, integrity and time failures.
-- Night streetlights, independent headlights during lighting takeover, and restoration after a staged defense.
-- Disk round-trip of unlocks, badges, currency and upgrades; corrupt-primary recovery from the backup, using isolated test files.
-- Extreme map size and all-applicable-attack achievement eligibility, real pedestrian contact, music import, and lifecycle cleanup.
+## Visual and interface checks
 
-## Practical limits
+Four additional checks verify the detailed car's bounded mesh count, four animated wheels, environment reflection capture and slope-blended terrain. Twenty-four layout checks cover menu, garage, briefing, normal driving, a multi-attack diagnostic, field guide, after-action report and achievements at each of:
 
-These are automated tests and inspected screenshots, not a manual keyboard playthrough. They do not prove every possible collision, traffic jam or recovery situation. No multiplayer, network security service, actual GPS receiver, real ransomware, or real command execution is implemented. The attacker challenge is local. Sensors sample the physics scene; the XOR exercise is a toy cipher. Suspension and crashes are arcade approximations, and the car/buildings remain stylized. Long-session performance and difficulty tuning still benefit from human playtesting.
+- 1280 × 720
+- 1024 × 768
+- 1920 × 1080
 
-Existing saves are protected by test mode. The source archive includes source assets, Unity metadata, documentation and tools. Build products and logs stay in their canonical project folders. GitHub Desktop still resolves the existing CyberCar junction to this project; no commit or push was made.
+Rendered text height and control bounds are checked during GUI repaint. The first run caught the diagnostic close button wrapping because of its padding; compact-button padding was corrected. Runtime screenshots were inspected, including the 720p diagnostic, 4:3 report, city and cliff driving. Background panels were added beneath navigation/status text to maintain contrast over scenery. Active-threat controls and paginated reports use more room per item.
+
+Evidence images are in `Builds/Windows/ui-*.png`, `realism-*.png`, and `smoke-*.png`. They come from the executable. `ArtSource/CyberInterceptor-Realism-preview.png` is explicitly a separate Blender studio render.
+
+## Limits
+
+Automated tests and inspected captures do not constitute a manual keyboard playthrough or exhaustive collision/performance testing. UI checks cover the listed sizes and states, not every window dimension or every possible string. The graphics are a realism upgrade; the world and car remain authored game approximations. No claim of full photorealism, production vehicle dynamics, multiplayer or real cybersecurity attacks is made. Existing saves remain protected during tests. No commit or push was performed.

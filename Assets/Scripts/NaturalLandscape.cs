@@ -5,7 +5,7 @@ namespace CyberCar {
  public sealed class NaturalLandscape:MonoBehaviour {
  struct RoadSample {public Vector3 A,B;public bool Bridge;public float T;}
  readonly Dictionary<Vector2Int,List<RoadSample>> cells=new Dictionary<Vector2Int,List<RoadSample>>();
- readonly List<Mesh> owned=new List<Mesh>();RoadNetwork graph;WorldBuilder world;
+ readonly List<Mesh> owned=new List<Mesh>();Material landscapeMaterial;RoadNetwork graph;WorldBuilder world;
  const float Bin=32;
  public void Build(WorldBuilder owner){
  world=owner;graph=world.Network;
@@ -20,7 +20,8 @@ namespace CyberCar {
  for(int z=0;z<=count;z++)for(int x=0;x<=count;x++){int n=z*(count+1)+x;float px=min+x*step,pz=min+z*step;vertices[n]=new Vector3(px,Height(px,pz),pz);if(x<count&&z<count){triangles[t++]=n;triangles[t++]=n+count+1;triangles[t++]=n+1;triangles[t++]=n+1;triangles[t++]=n+count+1;triangles[t++]=n+count+2;}}
  var mesh=new Mesh{name="Continuous mountain and coast",indexFormat=IndexFormat.UInt32};mesh.vertices=vertices;mesh.triangles=triangles;var uv=new Vector2[vertices.Length];for(int i=0;i<uv.Length;i++)uv[i]=new Vector2(vertices[i].x,vertices[i].z);mesh.uv=uv;mesh.RecalculateNormals();mesh.RecalculateTangents();mesh.RecalculateBounds();owned.Add(mesh);
  var go=new GameObject("Visible landscape collision");go.transform.SetParent(transform,false);go.AddComponent<MeshFilter>().sharedMesh=mesh;go.AddComponent<MeshCollider>().sharedMesh=mesh;
- var material=world.Photos.Surface(graph.Map==1?"aerial_beach_02":"rocky_terrain_02",8);go.AddComponent<MeshRenderer>().sharedMaterial=material;
+ var material=world.Photos.Surface("aerial_beach_02",8);
+ if(graph.Map>=2){landscapeMaterial=new Material(Resources.Load<Shader>("LandscapeBlend")){name="Slope blended rock and ground"};landscapeMaterial.SetTexture("_GroundTex",Resources.Load<Texture2D>("Photographic/grass_path_2_diffuse"));landscapeMaterial.SetTexture("_GroundNormal",Resources.Load<Texture2D>("Photographic/grass_path_2_normal"));landscapeMaterial.SetTexture("_RockTex",Resources.Load<Texture2D>("Photographic/rock_face_01_diff_1k"));landscapeMaterial.SetTexture("_RockNormal",Resources.Load<Texture2D>("Photographic/rock_face_01_nor_gl_1k"));material=landscapeMaterial;}go.AddComponent<MeshRenderer>().sharedMaterial=material;
  // A continuous sandy coastline sits below the cliff roads and meets the ocean.
  if(graph.Map==3)BeachStrip();
  var rng=new System.Random(315+graph.Map);
@@ -59,6 +60,6 @@ namespace CyberCar {
  for(int i=0;i<=count;i++){float x=-300+i*size/count;float shore=-35+Mathf.Sin(x*.012f)*5;v[i*3]=new Vector3(x,-25,shore);v[i*3+1]=new Vector3(x,-30,shore-25);v[i*3+2]=new Vector3(x,-34,shore-48);if(i>0)for(int j=0;j<2;j++){int a=(i-1)*3+j,b=i*3+j;tris.AddRange(new[]{a,a+1,b,b,a+1,b+1});}}
  var mesh=new Mesh{name="Irregular sandy shoreline"};mesh.vertices=v;mesh.triangles=tris.ToArray();mesh.RecalculateNormals();owned.Add(mesh);var go=new GameObject("Beach shoreline");go.transform.SetParent(transform,false);go.AddComponent<MeshFilter>().sharedMesh=mesh;go.AddComponent<MeshRenderer>().sharedMaterial=world.Photos.Surface("aerial_beach_02",6);go.AddComponent<MeshCollider>().sharedMesh=mesh;
  }
- void OnDestroy(){foreach(var m in owned)if(m)Destroy(m);}
+ void OnDestroy(){if(landscapeMaterial)Destroy(landscapeMaterial);foreach(var m in owned)if(m)Destroy(m);}
  }
 }

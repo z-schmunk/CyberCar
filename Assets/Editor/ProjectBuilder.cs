@@ -84,7 +84,7 @@ namespace CyberCar.Editor
         void OnPreprocessModel()
         {
             if(assetPath.Contains("/Photographic/Models/")){var photo=(ModelImporter)assetImporter;photo.isReadable=true;photo.materialImportMode=ModelImporterMaterialImportMode.ImportStandard;return;}
-            if(!assetPath.EndsWith("CyberInterceptor.fbx"))return;
+            if(!assetPath.Contains("/Art/CyberInterceptor"))return;
             var importer=(ModelImporter)assetImporter;importer.materialImportMode=ModelImporterMaterialImportMode.ImportStandard;
         }
     }

@@ -80,11 +80,13 @@ namespace CyberCar {
  foreach(var basePoint in signBases){float ground=GroundHeight(basePoint);if(basePoint.y>ground)Box("Sign anchored footing",new Vector3(basePoint.x,(basePoint.y+ground)/2,basePoint.z),new Vector3(.5f,basePoint.y-ground+.15f,.5f),concrete);}
  gameObject.AddComponent<TrafficSignals>().Build(this);
  Environment=gameObject.AddComponent<WorldEnvironment>();Environment.Build(this);
+ gameObject.AddComponent<RoadsideVegetation>().Build(this);
  }
  void Coast(int map,float size) {
  float sea=map==3?-32:-7;
  var water=new Material(Resources.Load<Shader>("CoastalWater"));owned.Add(water);
- int count=40;var vertices=new Vector3[(count+1)*(count+1)];var tris=new List<int>();
+ water.SetFloat("_CoastZ",map==3?-73:-74);water.SetFloat("_WaterLevel",sea);
+ int count=96;var vertices=new Vector3[(count+1)*(count+1)];var tris=new List<int>();
  for(int z=0;z<=count;z++)for(int x=0;x<=count;x++){int n=z*(count+1)+x;vertices[n]=new Vector3(-900+x*(size+1800)/count,sea,-900+z*(size+1800)/count);if(x<count&&z<count)tris.AddRange(new[]{n,n+count+1,n+1,n+1,n+count+1,n+count+2});}
  var mesh=new Mesh{name="Ocean waves"};mesh.vertices=vertices;mesh.triangles=tris.ToArray();var uv=new Vector2[vertices.Length];for(int i=0;i<uv.Length;i++)uv[i]=new Vector2(vertices[i].x/10,vertices[i].z/10);mesh.uv=uv;mesh.RecalculateNormals();mesh.RecalculateTangents();owned.Add(mesh);var ocean=new GameObject("Open ocean");ocean.transform.SetParent(transform);ocean.AddComponent<MeshFilter>().sharedMesh=mesh;ocean.AddComponent<MeshRenderer>().sharedMaterial=water;
  for(int x=-1;x<Network.Columns;x++){
