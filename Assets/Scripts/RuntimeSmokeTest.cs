@@ -22,6 +22,8 @@ namespace CyberCar
         IEnumerator Start()
         {
             yield return null;Session.InputEnabled=false;
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-trafficTest")>=0){yield return TrafficProof();Debug.Log("TRAFFIC_SUCCESS / "+checks);Application.Quit(0);yield break;}
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-missionTest")>=0){yield return MissionProof();yield return UiProof();Check(runtimeErrors==0,"No runtime errors or exceptions");Debug.Log("MISSION_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-uiTest")>=0){yield return VisualProof();yield return UiProof();Debug.Log("UI_VISUAL_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-expansionTest")>=0){yield return ExpansionProof();Debug.Log("EXPANSION_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-bridgeTest")>=0){yield return BridgeProof();Application.Quit(0);yield break;}
@@ -147,7 +149,7 @@ namespace CyberCar
             if(screenshot){File.WriteAllBytes(Path.Combine(Application.dataPath,"..","smoke-menu.png"),screenshot.EncodeToPNG());Destroy(screenshot);}
             Session.ShowAchievements();yield return new WaitForEndOfFrame();
             screenshot=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(Path.Combine(Application.dataPath,"..","smoke-achievements.png"),screenshot.EncodeToPNG());Destroy(screenshot);
-            yield return VisualProof();yield return UiProof();
+            yield return MissionProof();yield return TrafficProof();yield return VisualProof();yield return UiProof();
             Check(runtimeErrors==0,"No runtime errors or exceptions");
             File.WriteAllText(Path.Combine(Application.dataPath,"..","smoke-results.txt"),"PASS: "+checks+" checks\nPhysics, car collisions, thirteen staged attacks/defenses, drifting, pedestrian safety, four maps, curved bridge driving, extreme eligibility, save recovery, field guide, soundtrack, win/fail lifecycle, zero runtime errors.\n");
             Debug.Log("CYBERCAR_SMOKE_SUCCESS / "+checks);Application.Quit(0);
@@ -178,14 +180,78 @@ namespace CyberCar
                 Session.Menu();hud.ShowGarage(false);yield return CheckUi(prefix+"menu");
                 hud.ShowGarage(true);yield return CheckUi(prefix+"garage");hud.ShowGarage(false);
                 Session.SelectLevel(14);yield return CheckUi(prefix+"briefing");Session.Begin();yield return CheckUi(prefix+"driving");
-                Session.Attacks.Launch(CyberAttack.Ransomware);Session.Attacks.Launch(CyberAttack.SensorAttack);Session.Attacks.Launch(CyberAttack.MusicInjection);Session.Defense.Begin(3);Session.Defense.Choose(Session.Defense.EvidenceAnswer);Session.Defense.Choose(Session.Defense.EvidenceAnswer);yield return CheckUi(prefix+"diagnostic");
+                Session.Attacks.Launch(CyberAttack.Ransomware);Session.Attacks.Launch(CyberAttack.SensorAttack);Session.Attacks.Launch(CyberAttack.MusicInjection);yield return CheckUi(prefix+"threats");
+                Session.TogglePause();yield return CheckUi(prefix+"pause");Session.TogglePause();
+                Session.Defense.Begin(3);Session.Defense.Choose(Session.Defense.EvidenceAnswer);Session.Defense.Choose(Session.Defense.EvidenceAnswer);yield return CheckUi(prefix+"diagnostic");
                 Session.SetGuide(true);hud.ShowGuideTopic(7);yield return CheckUi(prefix+"guide");Session.SetGuide(false);
                 for(int i=0;i<AttackDirector.Count;i++)Session.Attacks.Launch((CyberAttack)i);Session.Finish(true,"Visual report review");yield return CheckUi(prefix+"report");
                 Session.ShowAchievements();yield return CheckUi(prefix+"achievements");
             }
             Screen.SetResolution(1440,900,FullScreenMode.Windowed);yield return new WaitForSecondsRealtime(.5f);Session.Menu();
         }
-        bool Solve(int attack){Session.Defense.Begin(attack);bool result=false;for(int i=0;i<3;i++)result=Session.Defense.Choose(Session.Defense.EvidenceAnswer);return result;}
+        bool Solve(int attack){Session.Defense.Begin(attack);bool result=false;for(int i=0;i<3&&Session.Defense.Open;i++)result=Session.Defense.Choose(Session.Defense.EvidenceAnswer);return result;}
+        IEnumerator MissionProof(){
+            Session.Prepare(14,0,2,true);Session.Begin();yield return new WaitForSeconds(.2f);Session.enabled=false;
+            Session.Attacks.Launch(CyberAttack.Ransomware);Session.Attacks.Launch(CyberAttack.MusicInjection);
+            var d=Session.Defense;d.Begin(3);d.Choose(d.EvidenceAnswer);string evidence=d.Evidence;int answer=d.EvidenceAnswer;
+            d.Begin(3);Check(d.Stage==1&&d.Evidence==evidence&&d.EvidenceAnswer==answer,"Re-inspecting a threat retains its evidence and completed steps");
+            d.Begin(10);d.Choose(d.EvidenceAnswer);d.Choose(d.EvidenceAnswer);d.Begin(3);
+            Check(d.Stage==1&&d.Evidence==evidence,"Switching simultaneous threats restores independent progress");
+            d.Close();d.Begin(10);Check(d.Stage==2,"Closing a diagnostic preserves progress for that encounter");
+            Session.Attacks.Cooldowns[10]=5;Check(!d.Choose(d.EvidenceAnswer)&&d.Stage==2&&Session.Attacks.Has(CyberAttack.MusicInjection),"Recovery cooldown does not advance beyond the final step");
+            Session.Attacks.Cooldowns[10]=0;Check(d.Choose(d.EvidenceAnswer)&&!d.Open&&!Session.Attacks.Has(CyberAttack.MusicInjection),"Verified recovery can be retried after cooldown");
+            d.Begin(3);int errors=d.Mistakes;Check(!d.Choose((d.EvidenceAnswer+1)%3)&&d.Mistakes==errors+1&&d.Stage==1&&d.Evidence==evidence,"Wrong choices count once and preserve current evidence");
+            Check(Solve(3),"A partially completed diagnostic resumes and resolves normally");
+            Session.Attacks.Launch(CyberAttack.Spoofing);d.Begin(0);d.Choose(d.EvidenceAnswer);
+            var old=Session.Attacks.Records.Find(r=>r.Active&&r.Type==CyberAttack.Spoofing);old.Active=false;Session.Attacks.Launch(CyberAttack.Spoofing);
+            Check(!d.Choose(d.EvidenceAnswer)&&!d.Open&&Session.Attacks.Has(CyberAttack.Spoofing),"Expired evidence cannot authorize a replacement attack of the same type");
+            d.Begin(0);Check(d.Stage==0,"Each new encounter starts with fresh diagnostic progress");
+            // Satellite fallback must wait for an RSU repair, then resume without restarting.
+            Session.Player.Recover(Session.World.Network.Nodes[0],Quaternion.identity);Session.Comms.Tick(0);
+            Session.Attacks.Launch(CyberAttack.SatelliteLoss);Session.Attacks.Launch(CyberAttack.RsuLoss);d.Begin(9);d.Choose(d.EvidenceAnswer);
+            Check(!d.Choose(d.EvidenceAnswer)&&d.Stage==1,"Satellite handoff waits while RSU authentication is unavailable");
+            Check(Solve(8),"RSU repair can finish while another diagnostic is waiting");d.Begin(9);
+            Check(d.Stage==1&&Solve(9)&&Session.Comms.SatelliteFallback,"Satellite handoff resumes after repairing the roadside link");
+            Session.Finish(true,"Mission rating review");Check(Session.Rating!=null&&Session.Rating.Mistakes==1&&Session.Rating.Threats==6&&Session.Rating.Defended==4,"After-action rating includes every encounter and diagnostic error");
+            yield return Capture("mission-rating.png");
+            var records=new System.Collections.Generic.List<AttackRecord>{new AttackRecord{Active=false,Defended=true}};
+            Check(new MissionRating(true,0,0,0,0,records).Stars==3,"A clean delivery with verified defenses earns three stars");
+            Check(new MissionRating(false,0,0,0,0,records).Stars==0,"A failed delivery cannot earn stars");
+            Check(new MissionRating(true,1,0,0,0,records).Stars==2&&new MissionRating(true,0,1,0,0,records).Stars==2,"Impacts or recovery remove the safe-driving star");
+            Check(new MissionRating(true,0,0,1,0,records).Stars==1,"Pedestrian contact caps a completed run at one star");
+            Check(new MissionRating(true,0,0,0,1,records).Stars==2,"Diagnostic errors remove the verified-recovery star");
+            records.Add(new AttackRecord{Active=false});Check(new MissionRating(true,0,0,0,0,records).Stars==2,"Expired uncontained attacks count against verified recovery");
+            Check(new MissionRating(true,0,0,0,0,new System.Collections.Generic.List<AttackRecord>()).Stars==3,"Clean orientation delivery can earn all three stars");
+            var profile=new DriverProfile();Check(ProgressStore.ImproveRecord(profile,2,2,60)&&ProgressStore.ImproveRecord(profile,2,3,90),"A safer higher-star run outranks a faster low-star run");
+            Check(!ProgressStore.ImproveRecord(profile,2,2,20)&&!ProgressStore.ImproveRecord(profile,2,3,100)&&ProgressStore.ImproveRecord(profile,2,3,85),"Only a faster time at the same rating replaces a personal best");
+            Check(!ProgressStore.ImproveRecord(profile,2,0,1)&&!ProgressStore.ImproveRecord(profile,2,3,float.NaN)&&!ProgressStore.ImproveRecord(profile,-1,3,1),"Invalid and failed results cannot enter mission records");
+            string path=Path.Combine(Application.temporaryCachePath,"cybercar-mission-record-test.json");
+            profile.unlocked=9;profile.credits=420;profile.badges[21]=true;profile.upgrades[0]=2;ProgressStore.WriteTo(path,profile);
+            var loaded=ProgressStore.LoadFrom(path);Check(loaded.version==4&&loaded.best[2].stars==3&&loaded.best[2].seconds==85&&loaded.credits==420&&loaded.badges[21]&&loaded.upgrades[0]==2,"Mission records survive disk reload alongside existing progress");
+            ProgressStore.WriteTo(path,profile);File.WriteAllText(path,"broken");loaded=ProgressStore.LoadFrom(path);
+            Check(loaded.best[2]!=null&&loaded.best[2].seconds==85,"Corrupt profile recovers mission records from backup");
+            foreach(int version in new[]{2,3}){File.WriteAllText(path,"{\"version\":"+version+",\"unlocked\":7,\"credits\":180,\"badges\":[true],\"upgrades\":[2]}");loaded=ProgressStore.LoadFrom(path);Check(loaded.version==4&&loaded.unlocked==7&&loaded.credits==180&&loaded.badges[0]&&loaded.upgrades[0]==2&&loaded.best.Length==15&&loaded.best[0]==null,"Legacy schema "+version+" keeps existing progress and initializes mission records");}
+            File.WriteAllText(path,"{\"version\":4,\"best\":[{\"stars\":8,\"seconds\":-1},null,{\"stars\":2,\"seconds\":20}]}");loaded=ProgressStore.LoadFrom(path);
+            Check(loaded.best[0]==null&&loaded.best[1]==null&&loaded.best[2].stars==2&&loaded.best.Length==15,"Partial or malformed record arrays normalize safely");
+            Check(!ProgressStore.RecordMission(0,3,1),"Automated runs cannot write the real player's mission records");
+            Session.Prepare(0,0,0,false);Check(Session.Rating==null&&Session.Defense.Mistakes==0&&!Session.Defense.Open,"Restart clears run-local rating and diagnostic state");Session.enabled=true;
+            Session.Prepare(8,0,1,false,night:true);Session.Begin();yield return new WaitForSeconds(.4f);
+            Material rear=null,front=null;foreach(var renderer in Session.Player.GetComponentsInChildren<Renderer>())foreach(var material in renderer.sharedMaterials){if(material.name=="Responsive rear lamps")rear=material;if(material.name=="Independent running lamps")front=material;}
+            Check(rear!=null&&front!=null&&rear.GetColor("_EmissionColor").r>1&&front.GetColor("_EmissionColor").b>2,"Night running lamps illuminate actual front and rear car meshes");
+            float rearGlow=rear.GetColor("_EmissionColor").r;Session.Player.Brake=true;yield return null;yield return new WaitForEndOfFrame();
+            Check(rear.GetColor("_EmissionColor").r>rearGlow*2,"Braking increases rear lamp intensity above night running lights");Session.Player.Brake=false;
+            Session.Attacks.Launch(CyberAttack.Blackout);yield return new WaitForSeconds(.4f);
+            bool trafficLamps=false;foreach(var renderer in Session.Cars[1].GetComponentsInChildren<Renderer>())foreach(var material in renderer.sharedMaterials)if(material.name=="Responsive rear lamps"&&material.GetColor("_EmissionColor").r>1)trafficLamps=true;
+            Check(Session.World.Environment.LitStreetlights==0&&rear.GetColor("_EmissionColor").r>=rearGlow&&trafficLamps,"Blackout leaves player and traffic running lights powered");
+            yield return new WaitForEndOfFrame();var frame=ScreenCapture.CaptureScreenshotAsTexture();int redPixels=0;var view=FindAnyObjectByType<ChaseCamera>().GetComponent<Camera>();
+            foreach(var renderer in Session.Player.GetComponentsInChildren<Renderer>())if(renderer.sharedMaterial==rear){
+                var bounds=renderer.bounds;Vector2 low=new Vector2(Screen.width,Screen.height),high=Vector2.zero;
+                for(int corner=0;corner<8;corner++){Vector3 p=bounds.center+Vector3.Scale(bounds.extents,new Vector3((corner&1)==0?-1:1,(corner&2)==0?-1:1,(corner&4)==0?-1:1));Vector3 screen=view.WorldToScreenPoint(p);low=Vector2.Min(low,screen);high=Vector2.Max(high,screen);}
+                for(int y=Mathf.Max(0,Mathf.FloorToInt(low.y)-2);y<=Mathf.Min(frame.height-1,Mathf.CeilToInt(high.y)+2);y++)for(int x=Mathf.Max(0,Mathf.FloorToInt(low.x)-2);x<=Mathf.Min(frame.width-1,Mathf.CeilToInt(high.x)+2);x++){Color pixel=frame.GetPixel(x,y);if(pixel.r>.5f&&pixel.r>pixel.g*2.5f&&pixel.r>pixel.b*2.5f)redPixels++;}
+            }
+            Destroy(frame);Check(redPixels>=6,"Rear running lamps produce visible red pixels during blackout");
+            yield return Capture("mission-night-lights.png");
+        }
         IEnumerator ExpansionProof(){
             bool storyValid=true;for(int level=0;level<GameSession.LevelCount;level++){var graph=new RoadNetwork(StoryCampaign.Maps[level],level==14);var route=StoryCampaign.Route(graph,level);storyValid&=route.Count>1&&route[route.Count-1]==graph.Finish;for(int n=1;n<route.Count;n++)storyValid&=graph.CanTravel(route[n-1],route[n]);}Check(storyValid,"All fifteen story routes reach named destinations through legal edges");
             Session.SelectLevel(10);Session.Begin();foreach(var c in Session.Cars)if(c!=Session.Player)c.gameObject.SetActive(false);
@@ -212,6 +278,7 @@ namespace CyberCar
             Check(g.CanTravel(a,b)&&!g.CanTravel(b,a)&&g.Route(b,a).Count>2,"One-way routes force legal alternate routing");
             var signals=Session.World.GetComponent<TrafficSignals>();Check(signals.Red(0,Vector3.right,14)&&!signals.Red(0,Vector3.right,2),"City traffic signal phases control crossing priority");
             var traffic=Session.Cars.Find(c=>c.GetComponent<TrafficAgent>()&&!c.GetComponent<TrafficAgent>().Hostile);traffic.Body.position=new Vector3(-70,20,-70);yield return new WaitForSeconds(.3f);g.ClosestRoad(traffic.transform.position,out _,out float roadDistance);
+            Debug.Log("TRAFFIC_RECOVERY body="+traffic.Body.position+" rendered="+traffic.transform.position+" roadDistance="+roadDistance);
             Check(roadDistance<g.RoadWidth,"AI containment returns escaped cars to visible roads");
             Session.Prepare(14,3,1,true,attacker:true);Session.Begin();Session.LaunchLab(10);Check(Session.AttackerMode&&Session.AttackBudget==10&&Session.Attacks.Has(CyberAttack.MusicInjection),"Attacker lab spends limited budget to affect AI courier");
             Session.Prepare(0,0,0,false,attacker:true);Session.Begin();foreach(var c in Session.Cars)if(c!=Session.Player)c.gameObject.SetActive(false);foreach(var c in Session.Citizens)c.gameObject.SetActive(false);
@@ -232,6 +299,21 @@ namespace CyberCar
             Check(Session.Player.Body.constraints==RigidbodyConstraints.None,"Pitch and roll remain available for 3D off-road motion");
             Session.Player.Throttle=0;Session.Player.Brake=true;Session.Player.Recover(Session.World.Network.Nodes[0]+Vector3.up*1.8f,Quaternion.Euler(0,90,180));yield return new WaitForSeconds(10);
             Check(Session.Player.Upright&&Session.Recoveries>0,"Overturned stationary car automatically recovers to its last checkpoint");
+        }
+        IEnumerator TrafficProof(){
+            int oldVsync=QualitySettings.vSyncCount,oldRate=Application.targetFrameRate;QualitySettings.vSyncCount=0;
+            foreach(int fps in new[]{30,120}){
+                Application.targetFrameRate=fps;Session.SelectLevel(5);Session.Begin();yield return new WaitForSeconds(.2f);
+                var graph=Session.World.Network;var traffic=Session.Cars.Find(c=>c.GetComponent<TrafficAgent>()&&!c.GetComponent<TrafficAgent>().Hostile);
+                foreach(var position in new[]{new Vector3(-70,20,-70),new Vector3(graph.Size+70,20,graph.Size+70),new Vector3(graph.Size/2,-20,graph.Size/2)}){
+                    traffic.Body.position=position;traffic.Body.linearVelocity=Vector3.zero;
+                    Debug.Log("TRAFFIC_TELEPORT targetFPS="+fps+" physicsRenderGap="+Vector3.Distance(traffic.Body.position,traffic.transform.position));
+                    for(int step=0;step<12;step++)yield return new WaitForFixedUpdate();yield return null;yield return null;
+                    graph.ClosestRoad(traffic.Body.position,out _,out float physical);graph.ClosestRoad(traffic.transform.position,out _,out float rendered);
+                    Check(physical<graph.RoadWidth&&rendered<graph.RoadWidth,"AI road recovery at target "+fps+" fps from "+position);
+                }
+            }
+            QualitySettings.vSyncCount=oldVsync;Application.targetFrameRate=oldRate;
         }
         IEnumerator BridgeProof()
         {

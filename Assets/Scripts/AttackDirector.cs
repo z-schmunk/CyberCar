@@ -2,7 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace CyberCar {
  public enum CyberAttack {Spoofing,DenialOfService,ControlInjection,Ransomware,Sybil,Replay,Firmware,Blackout,RsuLoss,SatelliteLoss,MusicInjection,DestinationInjection,SensorAttack}
- public sealed class AttackRecord {public CyberAttack Type;public float Remaining;public bool Active=true,Defended;public int Context;}
+ public sealed class AttackRecord {
+ public CyberAttack Type;public float Remaining;public bool Active=true,Defended;public int Context;
+ // Evidence belongs to this encounter, so switching threats cannot reset it or reuse an old solution.
+ public int DiagnosticStage;internal int Answer;internal string Evidence="";internal string[] Choices=new string[3];
+ }
  public sealed class AttackDirector {
  public const int Count=13;
  public static readonly string[] Keys={"Q","E","R","F","G","T","Y","U","I","O","J","K","L"};

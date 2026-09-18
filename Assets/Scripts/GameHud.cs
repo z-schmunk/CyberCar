@@ -42,22 +42,24 @@ namespace CyberCar
         {
             if(Session==null||Session.Player==null)return;Init();if(Event.current.type==EventType.Repaint)LayoutIssues.Clear();float scale=Mathf.Min(Screen.width/1440f,Screen.height/900f);
             GUI.matrix=Matrix4x4.TRS(new Vector3((Screen.width-1440*scale)/2,(Screen.height-900*scale)/2,0),Quaternion.identity,new Vector3(scale,scale,1));
-            if(Session.State==GameState.Menu)Menu();
+            if(Session.GuideOpen)Guide();
+            else if(Session.Paused)Pause();
+            else if(Session.State==GameState.Menu)Menu();
             else if(Session.State==GameState.Briefing)Briefing();
             else if(Session.State==GameState.Achievements)Achievements();
             else if(Session.State==GameState.Debrief)Report();
             else Hud();
-            if(Session.Paused&&!Session.GuideOpen)Pause();
-            if(Session.GuideOpen)Guide();
             GUI.matrix=Matrix4x4.identity;
         }
         void Header(string right)
         {Box(0,0,1440,66,ink);Label(34,20,650,32,"CYBERCAR    /    SECURE THE ROUTE",19,teal);Label(1010,22,400,28,right,15,muted);}
         void Menu(){
  Box(0,0,1440,900,ink);Header("STORY CAMPAIGN / AUTOMATIC SAVE");
+ if(garage){Garage();return;}
  Label(48,100,890,65,"THE RESPONSE COURIER",42);Label(50,170,820,55,"Restore the city's trusted network. Fifteen connected operations.",22,muted);
  for(int i=0;i<GameSession.LevelCount;i++){float x=50+(i/8)*423,y=248+(i%8)*58;bool unlocked=i<=ProgressStore.Unlocked;
- if(Button(x,y,402,49,(i+1).ToString("00")+"  "+GameSession.LevelNames[i]+(unlocked?"":" / LOCKED"),false,unlocked))Session.SelectLevel(i);}
+ var best=ProgressStore.Best(i);
+ if(Button(x,y,402,49,(i+1).ToString("00")+"  "+GameSession.LevelNames[i]+(unlocked?best==null?"":"  ["+MissionRating.Display(best.stars)+"]":" / LOCKED"),false,unlocked))Session.SelectLevel(i);}
  if(Button(50,756,255,55,"ACHIEVEMENTS"))Session.ShowAchievements();if(Button(325,756,255,55,"GARAGE / "+ProgressStore.Credits+" CR"))garage=!garage;if(Button(600,756,253,55,"QUIT"))Application.Quit();
  Box(924,240,470,574,panel);Label(948,259,420,44,"FREEPLAY",30);
  if(Button(947,324,421,50,GameSession.MapNames[mapChoice]))mapChoice=(mapChoice+1)%4;
@@ -68,10 +70,11 @@ namespace CyberCar
  Label(949,699,415,90,"Local AI courier challenge: spend six attack launches to delay a delivery. No multiplayer connection.",18,muted);
  if(Button(949,103,419,60,"CYBER FIELD GUIDE"))Session.SetGuide(true);
  Label(50,840,1250,35,"WASD drive  /  SHIFT drift  /  1-3 diagnostic choices  /  H field guide  /  M audio",18,muted);
- if(garage){Box(330,225,775,480,ink);Label(365,251,690,55,"GARAGE / "+ProgressStore.Credits+" CREDITS",32,teal);
+        }
+        void Garage(){Box(330,225,775,480,panel);Label(365,251,690,55,"GARAGE / "+ProgressStore.Credits+" CREDITS",32,teal);
  string[] names={"Tires / smoother grip recovery","Impact reinforcement / 10% less damage per tier","Secure console / +5 seconds per threat per tier"};
  for(int i=0;i<3;i++){int level=ProgressStore.Upgrade(i);if(Button(365,337+i*83,700,68,names[i]+"\nTier "+level+" / "+(level>=3?"MAX":ProgressStore.UpgradeCost(i)+" CR"),false,level<3&&ProgressStore.Credits>=ProgressStore.UpgradeCost(i)))ProgressStore.Purchase(i);}
- if(Button(365,614,700,58,"CLOSE GARAGE"))garage=false;}
+ if(Button(365,614,700,58,"CLOSE GARAGE"))garage=false;
         }
         void Briefing()
         {
@@ -84,6 +87,8 @@ namespace CyberCar
             Label(710,448,560,38,"DEFEND WHILE DRIVING",20,teal);
             Label(710,496,560,172,"Select an active threat to inspect it.\nChoose 1, 2 or 3 for each diagnostic step.\nDriving continues during diagnosis.\nRSU handoffs require range below 115 m.\nH pauses to explain every attack.\nGPS always retains cached roads.",21);
             Label(140,687,1120,40,"Route: "+(Session.RouteMeters/1000).ToString("0.0")+" km / Seed "+Session.RouteSeed+". H opens detailed attack and defense lessons.",19,muted);
+            var best=Session.Freeplay||Session.AttackerMode?null:ProgressStore.Best(Session.Level);
+            Label(140,733,1160,29,best==null?"Three stars: deliver, drive without impacts or recovery, resolve every threat without mistakes.":"PERSONAL BEST  ["+MissionRating.Display(best.stars)+"]  /  "+best.seconds.ToString("0.0")+" s at this rating. Safe driving earns stars; speed does not.",17,teal);
             if(Button(140,767,340,66,"DEPLOY  >",true))Session.Begin();
             if(Button(502,767,240,66,"BACK"))Session.Menu();
         }
@@ -98,9 +103,9 @@ namespace CyberCar
             {
                 if(!r.Active||Session.Defense.Open&&!Session.AttackerMode)continue;float y=211+row*121;Box(28,y,426,112,ink);Box(28,y,4,112,coral);
                 Label(47,y+12,378,28,AttackDirector.Names[(int)r.Type]+" / "+Mathf.CeilToInt(r.Remaining)+"s",18,coral);
-                Label(47,y+46,379,50,AttackDirector.Symptoms[(int)r.Type],17);
-                button.fontSize=13;if(Button(330,y+78,108,29,"INSPECT"))Session.Defense.Begin((int)r.Type);button.fontSize=18;
-                if(Session.Difficulty==0)Label(47,y+85,379,26,"USE "+AttackDirector.Keys[(int)r.Type]+" / "+AttackDirector.Defenses[(int)r.Type],15,teal);
+                Label(47,y+42,379,38,AttackDirector.Symptoms[(int)r.Type],17);
+                button.fontSize=13;if(Button(330,y+81,108,27,r.DiagnosticStage>0?"RESUME":"INSPECT"))Session.Defense.Begin((int)r.Type);button.fontSize=18;
+                Label(47,y+83,270,26,AttackDirector.Keys[(int)r.Type]+" / "+r.DiagnosticStage+" of 3 steps verified",15,teal);
                 row++;
             }
             if(row==0&&!Session.Defense.Open){Box(28,211,296,40,ink);Label(46,220,276,28,"SYSTEMS NOMINAL / stay alert",16,teal);}
@@ -114,7 +119,9 @@ namespace CyberCar
             for(int i=0;i<AttackDirector.Count;i++){
                 bool active=Session.Attacks.Has((CyberAttack)i);if(!Session.AttackerMode&&!active)continue;
                 float x=Session.AttackerMode?306+(slot%7)*157:306+(slot%3)*364,y=Session.AttackerMode?747+(slot/7)*57:778+(slot/3)*65;
-                if(Button(x,y,Session.AttackerMode?149:351,Session.AttackerMode?51:63,AttackDirector.Keys[i]+" / "+AttackDirector.Names[i],active)){
+                var encounter=Session.Attacks.Records.Find(r=>r.Active&&(int)r.Type==i);
+                string progress=Session.AttackerMode?"":"\n"+(encounter==null?0:encounter.DiagnosticStage)+" / 3 steps verified";
+                if(Button(x,y,Session.AttackerMode?149:351,Session.AttackerMode?51:63,AttackDirector.Keys[i]+" / "+AttackDirector.Names[i]+progress,active)){
                     if(Session.AttackerMode)Session.LaunchLab(i);else Session.Defense.Begin(i);
                 }slot++;
             }
@@ -157,10 +164,11 @@ namespace CyberCar
         }
         void Diagnostic(){
  var d=Session.Defense;Box(28,211,426,437,ink);Label(48,230,336,54,AttackDirector.Names[d.Attack]+" / "+(d.Stage+1)+" OF 3",18,teal);
+ for(int step=0;step<3;step++)Box(48+step*131,282,122,4,step<d.Stage?teal:muted*.4f);
  button.fontSize=13;if(Button(399,219,40,34,"X")){d.Close();button.fontSize=18;return;}
  Label(48,290,386,112,d.Evidence,18);
  button.fontSize=15;for(int i=0;i<3;i++)if(Button(48,410+i*65,386,58,(i+1)+"  "+d.Choices[i]))d.Choose(i);button.fontSize=18;
- Label(48,616,386,25,"Driving continues / keys 1, 2, 3",15,muted);
+ Label(48,616,386,25,"Progress kept per threat / driving continues",15,muted);
         }
         void Line(Vector2 a,Vector2 b,float width,Color color)
         {
@@ -171,6 +179,8 @@ namespace CyberCar
             Box(0,0,1440,900,ink);Header("AFTER-ACTION REPORT");
             Label(84,103,1230,72,Session.Won?"DELIVERY SECURED.":"OPERATION INTERRUPTED.",46,Session.Won?teal:coral);
             Label(86,184,1250,40,Session.EndReason+"   /   "+Session.Elapsed.ToString("0.0")+" s   /   "+Session.Crashes+" impacts   /   "+Mathf.CeilToInt(Session.Player.Health)+"% integrity",22,muted);
+            var rating=Session.Rating;
+            if(rating!=null)Label(86,230,1260,29,"RATING  ["+MissionRating.Display(rating.Stars)+"]  /  SAFE DRIVE "+(rating.SafeDriving?"YES":"NO")+"  /  VERIFIED "+rating.Defended+" of "+rating.Threats+" threats  /  "+rating.Mistakes+" mistakes"+(Session.NewPersonalBest?"  /  NEW BEST":""),20,teal);
             Label(86,264,275,30,"THREAT",16,teal);Label(367,264,220,30,"OUTCOME",16,teal);Label(600,264,744,30,"WHAT YOU LEARNED",16,teal);
             var encountered=new List<int>();for(int i=0;i<AttackDirector.Count;i++)if(Session.Attacks.Records.Exists(r=>(int)r.Type==i))encountered.Add(i);
             int pages=Mathf.Max(1,Mathf.CeilToInt(encountered.Count/4f));reportPage=Mathf.Clamp(reportPage,0,pages-1);
@@ -183,7 +193,7 @@ namespace CyberCar
                 Label(600,y+3,744,79,AttackDirector.Lessons[i],20,muted);
             }
             if(pages>1){if(Button(86,694,200,38,"< PREVIOUS",false,reportPage>0))reportPage--;Label(322,702,200,30,"PAGE "+(reportPage+1)+" / "+pages,18,muted);if(Button(550,694,200,38,"NEXT >",false,reportPage<pages-1))reportPage++;}
-            Label(86,735,1230,36,"Physical impacts are consequences in this simulation; each cyber defense models a real security principle.",18,muted);
+            Label(86,735,1230,36,Session.AttackerMode?"Local attacker practice has no campaign rating or rewards.":"Stars: delivery + no impacts/recovery + all threats resolved without mistakes. Pedestrian contact caps the rating at one.",18,muted);
             if(Session.Won&&!Session.Freeplay&&Session.Level<GameSession.LevelCount-1)
             {if(Button(86,788,368,66,"NEXT OPERATION  >",true))Session.SelectLevel(Session.Level+1);}
             else if(Button(86,788,368,66,"RETRY / DRIVE AGAIN",true))Session.Prepare(Session.Level,Session.World.Network.Map,Session.Difficulty,Session.Freeplay,night:Session.Night,attacker:Session.AttackerMode);

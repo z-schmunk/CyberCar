@@ -13,6 +13,7 @@ namespace CyberCar {
  public List<int> Route{get;private set;}public int RouteIndex{get;private set;}=1;
  public bool Night{get;private set;}public int Level{get;private set;}public int Difficulty{get;private set;}public bool Freeplay{get;private set;}public int RouteSeed{get;private set;}
  public float Elapsed{get;private set;}public float Limit{get;private set;}public float RouteMeters{get;private set;}
+ public MissionRating Rating{get;private set;}public bool NewPersonalBest{get;private set;}
  public int Recoveries{get;private set;}public int Crashes{get;private set;}public int CivilianStrikes{get;private set;}public int LastLesson=-1;public bool Won{get;private set;}public bool ExtremeAwardEligible=>Freeplay&&Difficulty==3&&World.Network.Columns==9&&CivilianStrikes==0&&Attacks.AllDefended;
  public string EndReason{get;private set;}="";public string Notice{get;private set;}="";public float NoticeUntil;public bool NoticeWarning;public bool Testing;public bool InputEnabled=true;
  public bool InHotspot=>World&&Player&&World.Network.NearbyHotspot(Player.transform.position)>=0;
@@ -28,7 +29,7 @@ namespace CyberCar {
  Prepare(0,0,0,false);State=GameState.Menu;if(Testing)gameObject.AddComponent<RuntimeSmokeTest>().Session=this;
  }
  public void Prepare(int level,int map,int difficulty,bool freeplay,int? seed=null,bool? night=null,bool attacker=false){
- Time.timeScale=1;Paused=false;GuideOpen=false;AttackerMode=attacker;AttackBudget=12;labDefenseTimer=0;stuckTimer=0;if(World){World.gameObject.SetActive(false);Destroy(World.gameObject);}
+ Time.timeScale=1;Paused=false;GuideOpen=false;Rating=null;NewPersonalBest=false;AttackerMode=attacker;AttackBudget=12;labDefenseTimer=0;stuckTimer=0;if(World){World.gameObject.SetActive(false);Destroy(World.gameObject);}
  foreach(var car in Cars)if(car){car.gameObject.SetActive(false);Destroy(car.gameObject);}Cars.Clear();Citizens.Clear();ambushes.Clear();
  Level=Mathf.Clamp(level,0,LevelCount-1);Night=night??(!freeplay&&(level==8||level==14));Difficulty=Mathf.Clamp(difficulty,0,3);Freeplay=freeplay;Elapsed=0;Crashes=0;Recoveries=0;CivilianStrikes=0;RouteIndex=1;damageTimer=0;recoverCooldown=0;Notice="";Won=false;LastLesson=-1;RouteSeed=seed??(Testing?1729:System.Environment.TickCount&int.MaxValue);
  var world=new GameObject("Map - "+MapNames[map]);World=world.AddComponent<WorldBuilder>();World.Generate(map,Difficulty==3);World.CreateSecret();Route=freeplay?World.Network.MissionRoute(RouteSeed):StoryCampaign.Route(World.Network,Level);RouteMeters=World.Network.RouteLength(Route);
@@ -79,7 +80,7 @@ namespace CyberCar {
  public void OnCrash(float severity){Crashes++;Notify("Impact recorded. Keep a safe following distance.",true);}
  public void Award(int badge){if(ProgressStore.Award(badge))Notify("ACHIEVEMENT / "+ProgressStore.Achievements[badge]);}
  public void Notify(string text,bool warning=false){Notice=text;NoticeWarning=warning;NoticeUntil=Time.unscaledTime+6;}
- public void Finish(bool won,string reason){if(State!=GameState.Driving)return;Won=won;EndReason=reason;State=GameState.Debrief;Paused=false;Time.timeScale=1;foreach(var car in Cars){car.Driving=false;car.Body.linearVelocity=Vector3.zero;car.Body.angularVelocity=Vector3.zero;}if(won&&!AttackerMode){ProgressStore.Reward(Level,Freeplay);Award(0);if(Crashes==0)Award(6);if(CivilianStrikes==0)Award(13);if(ExtremeAwardEligible)Award(11);if(!Freeplay){ProgressStore.Complete(Level);if(Level==5)Award(8);if(Level==7)Award(14);if(Level==8)Award(16);}}ProgressStore.Save();}
+ public void Finish(bool won,string reason){if(State!=GameState.Driving)return;Won=won;EndReason=reason;Rating=AttackerMode?null:new MissionRating(won,Crashes,Recoveries,CivilianStrikes,Defense.Mistakes,Attacks.Records);if(won&&!Freeplay&&!AttackerMode)NewPersonalBest=ProgressStore.RecordMission(Level,Rating.Stars,Elapsed);State=GameState.Debrief;Paused=false;Time.timeScale=1;foreach(var car in Cars){car.Driving=false;car.Body.linearVelocity=Vector3.zero;car.Body.angularVelocity=Vector3.zero;}if(won&&!AttackerMode){ProgressStore.Reward(Level,Freeplay);Award(0);if(Crashes==0)Award(6);if(CivilianStrikes==0)Award(13);if(ExtremeAwardEligible)Award(11);if(!Freeplay){ProgressStore.Complete(Level);if(Level==5)Award(8);if(Level==7)Award(14);if(Level==8)Award(16);}}ProgressStore.Save();}
  void OnApplicationQuit(){ProgressStore.Save();}
  void OnDestroy(){Time.timeScale=1;}
  }

@@ -22,6 +22,14 @@ Follow the circular, heading-up GPS road map and its solid direction arrow. Gray
 
 Each defense requires containment, evidence verification, and safe recovery. Wrong answers leave the threat active and cost four mission seconds. Driving continues throughout diagnosis. The field guide explains the principle and the simulation's limits. Learner and Operator allow one scheduled threat; Expert allows two, Extreme three. Explicit attacker-lab launches can overlap.
 
+Diagnostic progress is retained separately for each active encounter. Close a panel or switch threats to repair an RSU first, then resume the waiting satellite handoff. Evidence and choices remain stable; expired encounters cannot authorize a new attack. Progress stays local to the current run, and the attack continues until all three steps succeed. Threat cards and controls show completed steps. Guide, pause and garage screens isolate their controls from the screens behind them.
+
+## Mission ratings
+
+A completed delivery earns one star, plus one for no impacts, recovery or pedestrian contact, and one for resolving every encountered attack without a wrong diagnostic choice. Uncontained expired attacks count against the security star. Pedestrian contact caps the result at one star; failed deliveries earn none. Clean orientation runs can earn all three. The report shows defended/encountered threats and mistakes.
+
+Story missions save their highest rating and the fastest time **at that rating**. A higher-star run outranks a faster lower-star run. Mission selection and briefings show the saved best. Freeplay receives a run rating without mixing records from different maps or difficulties; attacker practice has no campaign rating. Existing achievements and upgrade rewards are retained.
+
 ## Story and threats
 
 | Operation | New scenario |
@@ -52,6 +60,8 @@ Ordinary traffic spawns in three-car groups, shares destinations and leaves foll
 
 Four sprung tire contact points allow pitch, roll, slopes and airborne motion. Steering/throttle smoothing, reverse braking, progressive drift recovery and reduced bounce improve handling. Impacts transfer momentum, reduce integrity and deform the car body. This is an arcade suspension model, not a calibrated automotive simulator or soft-body crash model.
 
+Player and traffic cars have brighter front and rear running lamps at night. Brake lights brighten further, and vehicle lighting remains independent of compromised streetlights. AI road containment runs on physics steps using Rigidbody positions, so render interpolation cannot delay a road-boundary correction.
+
 Manual recovery handles ordinary off-road trouble. A stationary overturned car or a car applying throttle while stuck automatically recovers after seven seconds. Recovery is disabled after entering the broken-bridge fall zone; driving off the unfinished deck causes an actual gravity-driven fall and mission failure. Ocean loss also ends the mission. Visible guardrails remain physical obstacles; unguarded roads allow off-road exploration.
 
 RSUs use a 115-meter gameplay coverage radius. Contact changes with distance and can be attacked. A satellite-denial defense switches to authenticated roadside references plus odometry; it does not stop the jammer. Outside RSU range, estimated position can drift while cached roads stay visible. When RSU loss overlaps satellite loss, repair the roadside link first. Real DSRC is a communication link; surveyed-reference positioning here is an educational assumption, not a DSRC guarantee.
@@ -62,7 +72,7 @@ First completion of each story operation grants 180 credits; freeplay wins grant
 
 Progress, badges, credits, upgrades and music volume save atomically with a backup at:
 `%USERPROFILE%/AppData/LocalLow/CyberCarLearning/CyberCarGame/driver-profile-v2.json`.
-The stable filename now contains schema version 3. Version 2 profiles and legacy PlayerPrefs migrate without deleting earlier progress. A corrupt primary file falls back to `.bak`. Mid-race positions are not saved; saves are local, not cloud synchronized.
+The stable filename now contains schema version 4. Version 2 and 3 profiles and legacy PlayerPrefs migrate without deleting earlier progress; mission records initialize empty. A corrupt primary file falls back to `.bak`. Mid-race positions and unfinished diagnostics are not saved; saves are local, not cloud synchronized.
 
 ## Attacker training
 

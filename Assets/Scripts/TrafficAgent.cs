@@ -4,8 +4,18 @@ namespace CyberCar {
  [RequireComponent(typeof(VehicleController))] public sealed class TrafficAgent:MonoBehaviour {
  public GameSession Session;public bool Hostile;VehicleController car;List<Vector3> points=new List<Vector3>();int waypoint,serial;float stuck,reverseUntil,containTimer;public int PlatoonId=>Hostile?-1:(serial-20)/3;public bool Congested{get;private set;}System.Random rng;
  public void Initialize(GameSession session,bool hostile,int index){Session=session;Hostile=hostile;serial=index;rng=new System.Random((hostile?index:(index-20)/3)*73+session.RouteSeed);car=GetComponent<VehicleController>();Plan();}
- void Plan(){var graph=Session.World.Network;int from=graph.Nearest(transform.position);bool pursuit=Hostile&&Session.Elapsed>Session.Attacks.TrustedTrafficUntil;int target=pursuit?graph.Nearest(Session.Player.transform.position):rng.Next(3)!=0?graph.Hotspots[rng.Next(graph.Hotspots.Count)]:rng.Next(graph.Nodes.Count);if(!Hostile&&(serial-20)%3!=0){foreach(var other in Session.Cars){var member=other.GetComponent<TrafficAgent>();if(member!=null&&member!=this&&member.serial==20+PlatoonId*3){target=graph.Nearest(other.transform.position);break;}}}
- if(target==from)target=(from+1)%graph.Nodes.Count;points=graph.TravelPath(graph.Route(from,target,Hostile));waypoint=0;while(waypoint<points.Count-1&&Vector3.Distance(points[waypoint],transform.position)<12)waypoint++;}
+ void Plan(){var graph=Session.World.Network;int from=graph.Nearest(car.Body.position);bool pursuit=Hostile&&Session.Elapsed>Session.Attacks.TrustedTrafficUntil;int target=pursuit?graph.Nearest(Session.Player.Body.position):rng.Next(3)!=0?graph.Hotspots[rng.Next(graph.Hotspots.Count)]:rng.Next(graph.Nodes.Count);if(!Hostile&&(serial-20)%3!=0){foreach(var other in Session.Cars){var member=other.GetComponent<TrafficAgent>();if(member!=null&&member!=this&&member.serial==20+PlatoonId*3){target=graph.Nearest(other.Body.position);break;}}}
+ if(target==from)target=(from+1)%graph.Nodes.Count;points=graph.TravelPath(graph.Route(from,target,Hostile));waypoint=0;while(waypoint<points.Count-1&&Vector3.Distance(points[waypoint],car.Body.position)<12)waypoint++;}
+ void FixedUpdate(){
+ if(car==null||!Session.Running)return;containTimer-=Time.fixedDeltaTime;if(containTimer>0)return;containTimer=.15f;
+ // Use the physical pose: the rendered transform deliberately trails it with interpolation.
+ var graph=Session.World.Network;Vector3 position=car.Body.position;
+ Vector3 road=graph.ClosestRoad(position,out Vector3 tangent,out float distance);float edge=graph.RoadWidth/2-1.5f;
+ if(distance<=edge)return;
+ if(distance>20){car.Recover(road,Quaternion.LookRotation(tangent));Plan();return;}
+ Vector3 offset=Vector3.ProjectOnPlane(position-road,Vector3.up),clamped=road+Vector3.ClampMagnitude(offset,edge);clamped.y=road.y+.08f;
+ car.Body.position=clamped;car.Body.linearVelocity=Vector3.Project(car.Body.linearVelocity,tangent);
+ }
  void Update(){
  if(car==null||!Session.Running)return;
  if(waypoint>=points.Count)Plan();if(points.Count==0)return;
@@ -16,8 +26,6 @@ namespace CyberCar {
  Vector3 relative=transform.InverseTransformPoint(aim);float angle=Mathf.Atan2(relative.x,relative.z)*Mathf.Rad2Deg;
  car.Steer=Mathf.Clamp(angle/30,-1,1);car.MaxSpeed=pursuit?(Session.Attacks.Has(CyberAttack.Sybil)?31:22+Session.Difficulty*2):Session.World.Network.SpeedLimit-serial%3*.35f;car.Throttle=1;car.Brake=Mathf.Abs(angle)>35&&Mathf.Abs(car.Speed)>10;
  bool yield=Session.World.GetComponent<TrafficSignals>().MustStop(transform.position,transform.forward,Time.time)&&!pursuit;
- containTimer-=Time.deltaTime;
- if(containTimer<=0){containTimer=.15f;var graph=Session.World.Network;Vector3 road=graph.ClosestRoad(transform.position,out Vector3 tangent,out float distance);float edge=graph.RoadWidth/2-1.5f;if(distance>edge){Vector3 offset=Vector3.ProjectOnPlane(transform.position-road,Vector3.up);Vector3 clamped=road+Vector3.ClampMagnitude(offset,edge);clamped.y=road.y+.08f;car.Body.position=clamped;car.Body.linearVelocity=Vector3.Project(car.Body.linearVelocity,tangent);if(distance>20){car.Recover(road,Quaternion.LookRotation(tangent));Plan();}}}
  // Three-car groups share a route and maintain a speed-dependent gap. Congestion is physical.
  if(!Hostile&&serial%3!=2){foreach(var other in Session.Cars){if(other==car||other.IsPlayer)continue;var agent=other.GetComponent<TrafficAgent>();if(agent==null||agent.Hostile||agent.PlatoonId!=PlatoonId)continue;Vector3 local=transform.InverseTransformPoint(other.transform.position);if(local.z>0&&local.z<Mathf.Max(9,car.Speed*1.2f)&&Mathf.Abs(local.x)<3.5f)yield=true;}}
 
