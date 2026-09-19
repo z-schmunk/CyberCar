@@ -8,6 +8,11 @@ namespace CyberCar {
  public PhotographicMaterials Photos{get;private set;} public WorldEnvironment Environment{get;private set;}
  readonly List<Vector3> signBases=new List<Vector3>();readonly List<Transform> palmRoots=new List<Transform>();
  readonly List<Object> owned=new List<Object>();Material road,concrete,cyan,amber,white,steel,rock,sand,leaves;
+ Material[] trafficFinishes;
+ public Material TrafficFinish(int index){
+ if(trafficFinishes==null){Color[] colors={new Color(.68f,.67f,.61f),new Color(.035f,.065f,.095f),new Color(.18f,.025f,.035f),new Color(.19f,.22f,.18f),new Color(.025f,.029f,.032f),new Color(.38f,.4f,.42f)};trafficFinishes=new Material[colors.Length];for(int i=0;i<colors.Length;i++){trafficFinishes[i]=Mat("Traffic finish "+i,colors[i],.65f);trafficFinishes[i].SetFloat("_Glossiness",.8f);}}
+ return trafficFinishes[Mathf.Abs(index)%trafficFinishes.Length];
+ }
  public Material Mat(string name,Color color,float metal=0,bool emission=false){var m=new Material(Shader.Find("Standard")){name=name,color=color,enableInstancing=true};m.SetFloat("_Metallic",metal);m.SetFloat("_Glossiness",.25f);if(emission){m.EnableKeyword("_EMISSION");m.SetColor("_EmissionColor",color);}owned.Add(m);return m;}
  public GameObject Box(string name,Vector3 p,Vector3 scale,Material mat,bool solid=true){var o=GameObject.CreatePrimitive(PrimitiveType.Cube);o.name=name;o.transform.SetParent(transform,false);o.transform.position=p;o.transform.localScale=scale;o.GetComponent<Renderer>().sharedMaterial=mat;if(!solid)Destroy(o.GetComponent<Collider>());return o;}
  public GameObject Segment(string name,Vector3 a,Vector3 b,float width,float height,Material mat,bool solid=false){var o=Box(name,(a+b)/2,new Vector3(width,height,Vector3.Distance(a,b)+.08f),mat,solid);o.transform.rotation=Quaternion.LookRotation(b-a);return o;}
@@ -16,6 +21,8 @@ namespace CyberCar {
  for(int i=0;i<path.Length;i++){Vector3 tangent=path[Mathf.Min(i+1,path.Length-1)]-path[Mathf.Max(i-1,0)],side=Vector3.Cross(Vector3.up,tangent.normalized).normalized*width/2;vertices[i*4]=path[i]-side;vertices[i*4+1]=path[i]+side;vertices[i*4+2]=path[i]-side-Vector3.up*.6f;vertices[i*4+3]=path[i]+side-Vector3.up*.6f;
  if(i==0)continue;int a=(i-1)*4,b=i*4;triangles.AddRange(new[]{a,b,a+1,a+1,b,b+1,a+2,a+3,b+2,a+3,b+3,b+2,a,a+2,b,a+2,b+2,b,a+1,b+1,a+3,a+3,b+1,b+3});}
  var mesh=new Mesh{name=name};mesh.vertices=vertices;mesh.triangles=triangles.ToArray();var uv=new Vector2[vertices.Length];for(int j=0;j<uv.Length;j++)uv[j]=new Vector2(vertices[j].x,vertices[j].z);mesh.uv=uv;mesh.RecalculateNormals();mesh.RecalculateTangents();mesh.RecalculateBounds();owned.Add(mesh);
+ var roadUV=new Vector2[vertices.Length];var colors=new Color[vertices.Length];float length=0,total=0;for(int i=1;i<path.Length;i++)total+=Vector3.Distance(path[i-1],path[i]);
+ for(int i=0;i<path.Length;i++){if(i>0)length+=Vector3.Distance(path[i-1],path[i]);float fade=Mathf.SmoothStep(0,1,Mathf.Min(length,total-length)/14f);for(int j=0;j<4;j++){roadUV[i*4+j]=new Vector2(j%2==0?-width/2:width/2,length);colors[i*4+j]=new Color(fade,1,1,1);}}mesh.uv2=roadUV;mesh.colors=colors;
  var go=new GameObject(name);go.transform.SetParent(transform,false);go.AddComponent<MeshFilter>().sharedMesh=mesh;go.AddComponent<MeshRenderer>().sharedMaterial=mat;if(solid)go.AddComponent<MeshCollider>().sharedMesh=mesh;return go;
  }
  public void Generate(int map,bool extreme=false) {
@@ -41,7 +48,7 @@ namespace CyberCar {
  if(i>3&&i<path.Length-3){if(i%2==0)Segment("Center dash",mid-f*1.5f+Vector3.up*.035f,mid+f*1.5f+Vector3.up*.035f,.15f,.018f,white);
  foreach(int sign in new[]{-1,1}){Segment("Edge line",a+side*sign*(w/2-1)+Vector3.up*.025f,b+side*sign*(w/2-1)+Vector3.up*.025f,.12f,.018f,white);
  if(Network.IsBridge(e.x,e.y)||(map>=2&&(e.x+e.y)%3==0)){Segment("Guardrail",a+side*sign*(w/2+.25f)+Vector3.up*.75f,b+side*sign*(w/2+.25f)+Vector3.up*.75f,.22f,.4f,steel,true);Box("Guardrail post",mid+side*sign*(w/2+.25f)+Vector3.up*.45f,new Vector3(.16f,.9f,.16f),steel,false);}
- else if(map==0)Segment("Sidewalk",a+side*sign*(w/2+1.3f),b+side*sign*(w/2+1.3f),2.3f,.2f,concrete);
+ else if(map==0)Segment("Sidewalk",a+side*sign*(w/2+1.3f)-Vector3.up*.25f,b+side*sign*(w/2+1.3f)-Vector3.up*.25f,2.3f,.7f,concrete,true);
  }}
  }
  if(Network.IsBridge(e.x,e.y)) {
@@ -81,6 +88,7 @@ namespace CyberCar {
  gameObject.AddComponent<TrafficSignals>().Build(this);
  Environment=gameObject.AddComponent<WorldEnvironment>();Environment.Build(this);
  gameObject.AddComponent<RoadsideVegetation>().Build(this);
+ gameObject.AddComponent<StreetDetails>().Build(this);
  }
  void Coast(int map,float size) {
  float sea=map==3?-32:-7;

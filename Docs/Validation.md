@@ -1,30 +1,30 @@
-# Validation — September 18, 2026
+# Validation — September 18, 2026: road and lighting presentation
 
-**206 automated checks passed in the delivered Windows build.** No runtime errors/exceptions, C# compilation errors/warnings, or shader errors were observed in the final build/run. Git diff whitespace validation passed.
+**224 automated checks passed** in the delivered Windows build. No C# compilation errors/warnings, shader errors, or runtime errors/exceptions were observed in the final build/run. Git whitespace validation passed.
 
-- Build: Logs/MissionBuild5.log, Unity 6000.6.0f1, Windows x64 Mono development build; 276,327,284 bytes reported by Unity.
-- Full run: Logs/MissionFinalRuntime5.log, ending CYBERCAR_SMOKE_SUCCESS / 206.
-- Focused candidate runs: Logs/MissionFocused4.log passed 65 mission/UI checks; Logs/MissionTraffic3.log passed six AI recovery cases. The full final run repeats their coverage.
-- Prior validation is preserved in Docs/Validation-2026-09-15.md.
+- Build: Logs/PresentationBuild3.log; Unity 6000.6.0f1, Windows x64 Mono development build; 276,521,800 bytes reported by Unity.
+- Full regression: Logs/PresentationFinalRuntime3.log ends with CYBERCAR_SMOKE_SUCCESS / 224.
+- Earlier presentation candidate: Logs/PresentationFocused1.log, 46 checks. Final full coverage includes the later drainage and sidewalk support additions.
+- Previous mission-update validation: Docs/Validation-Mission-2026-09-18.md.
 
-## New coverage
+## Changes and evidence
 
-Thirty-four mission checks cover independent diagnostic progress, close/reopen and threat switching, cooldown retry, wrong-answer counting, expired evidence rejection, dependent RSU/satellite repairs, report integration, rating rules, personal-best ordering, actual disk persistence, schema 2/3 migration, malformed records, backup recovery, test-mode write protection and run reset. Four of these checks cover front/rear lamp materials, stronger braking emission, independent player/traffic lighting during blackout, and visible red pixels inside the projected rear-lamp bounds.
+RoadSurface reuses the existing licensed photographed asphalt textures. Mesh UV2 coordinates carry lateral meters and cumulative path distance, so subtle tire wear and resurfacing patches follow curved roads. Markings use a separate worn-paint shader. Intersections retain the same darker asphalt color family. All four maps, including an Extreme coastal map, passed material support, continuous wear-coordinate and marking checks.
 
-Six additional AI checks move a traffic car outside either corner of the road network and below the road, at each of 30 and 120 target FPS. Both physical and rendered positions must recover to the roads. These are frame-rate targets, not a performance benchmark.
+City sidewalks now extend to their foundation, with unchanged top height and matching BoxCollider surfaces. Raycasts verify collider/visible-top alignment. Full lane-clearance and visible-collider audits pass with these colliders. Decorative drain grates are combined into one mesh with no collision shapes. Traffic uses six shared metallic finishes; the runtime verifies visible ordinary cars use at least four distinct finishes.
 
-Thirty UI checks cover menu, garage, briefing, driving, three simultaneous threat cards, pause, diagnostic, field guide, report and achievements at 1280x720, 1024x768 and 1920x1080. Repaint-time text bounds and control bounds pass. Screenshots of the report, 4:3 diagnostic, garage, threat cards and blackout were inspected. Guide/pause/garage now render only their own controls, preventing background controls from receiving their clicks; no manual click-through test is claimed.
+DrivingPresentation adds highlight extraction, two reduced-resolution blur passes and restrained film response before IMGUI. Bloom width is capped at 640 pixels, and temporary render targets are released after each frame. A before/after framebuffer check confirms the pass affects the rendered world. The previous blackout lamp pixel test still passes with the camera effect enabled. This is a visual treatment, not a new render pipeline or a physically calibrated camera.
 
-The prior driving, collision, drift, reverse, off-road, physical bridge traversal/fall, rollover recovery, pedestrians, all thirteen defenses, road graphs/signals, actual AI courier delivery, visible world-collider audits, lighting, asset and persistence regressions remain covered.
+The 18 new presentation checks supplement the prior 206 checks. The full suite still covers physical acceleration/collisions, reverse/drift, off-road suspension, bridge driving/falls, traffic containment, pedestrians, thirteen staged cyber defenses, dependent RSU repair, mission ratings, save migration/backup recovery, achievements and actual AI courier delivery.
 
-## Issues found and corrected
+## UI and visual review
 
-The first full candidate failed AI road containment immediately after a forced physics displacement. Boundary handling had read the interpolated rendered transform in Update. It now runs in FixedUpdate using Rigidbody.position, and replans from that same physical pose. The original reproduction and six targeted recovery cases pass in the final build. Diagnostic logs demonstrate a physics/render pose gap immediately after displacement; the final test checks both converge onto the road.
+Thirty UI checks pass at 1280x720, 1024x768 and 1920x1080: menu, garage, briefing, driving, threat cards, pause, diagnostics, guide, reports and achievements. Bounds and text height are checked during repaint. IMGUI remains outside the camera lighting pass.
 
-A material-state lamp test passed while the screenshot still showed dark lenses. An explicit Resources/VehicleLamp shader replaced runtime Standard emission variants for the lamp meshes. The final framebuffer test and inspected blackout capture show red tail lights. This is why material-state checks alone were insufficient. A Unity camera-lookup deprecation warning in candidate build 4 was corrected before final build 5.
+Executable captures were inspected for city road wear, grounded sidewalk edges, drainage, coastal night lighting, and readable HUD/navigation. Evidence: Builds/Windows/presentation-map-0.png through presentation-map-3.png, presentation-street-detail.png, and ui-*.png. These are runtime captures, not mockups.
 
 ## Delivery and limits
 
-Source, assets and documentation remain in CyberCarGame and its existing GitHub Desktop repository. A pre-change snapshot is Backups/Before-Mission-Polish-2026-09-17.zip; the refreshed source archive is ZIP-verified and SHA-256 recorded in Backups/Delivery.json. Tests do not write the real player's progress. No commit or push was performed.
+All source and assets remain under CyberCarGame in the existing repository. Before-change backup: Backups/Before-Road-Presentation-2026-09-18.zip. Refreshed source backup is ZIP-verified; Backups/Delivery.json records its SHA-256 and the delivered assembly hash. No commit or push was performed. No new external assets, paid services, packages or save schema changes were introduced. Automated tests do not write the player's progress.
 
-Automated physics tests and inspected captures are not a manual keyboard playthrough or exhaustive collision/performance testing. Some campaign completion cases use checkpoint teleportation. UI checks cover the listed sizes/states, not every possible string or input sequence. Partial diagnostics survive switching within a run, not quitting; freeplay ratings are not pooled across different maps/difficulties. The educational attacks remain inert local simulations, and the car remains an arcade physics model.
+This is an incremental realism pass. Existing authored geometry and arcade driving remain. Automated tests and screenshot inspection do not constitute a manual keyboard playthrough or a GPU performance benchmark. Some campaign-completion checks use checkpoint teleportation. Decorative drain grates have no collision shapes; the underlying road supplies the physical surface. Only the existing Windows built-in-renderer target was validated.

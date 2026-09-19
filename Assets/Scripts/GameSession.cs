@@ -24,7 +24,7 @@ namespace CyberCar {
  float damageTimer,recoverCooldown,stuckTimer;readonly HashSet<int> ambushes=new HashSet<int>();
  void Awake(){
  Application.targetFrameRate=60;var args=System.Environment.GetCommandLineArgs();Testing=System.Array.IndexOf(args,"-smokeTest")>=0;ProgressStore.Testing=Testing;
- var cam=new GameObject("Chase camera");var camera=cam.AddComponent<Camera>();camera.fieldOfView=62;camera.farClipPlane=1600;camera.clearFlags=CameraClearFlags.Skybox;cam.AddComponent<AudioListener>();cam.AddComponent<ChaseCamera>().Session=this;
+ var cam=new GameObject("Chase camera");var camera=cam.AddComponent<Camera>();camera.fieldOfView=62;camera.farClipPlane=1600;camera.clearFlags=CameraClearFlags.Skybox;cam.AddComponent<AudioListener>();cam.AddComponent<ChaseCamera>().Session=this;cam.AddComponent<DrivingPresentation>().Session=this;
  gameObject.AddComponent<GameHud>().Session=this;gameObject.AddComponent<DriveMusic>().Session=this;
  Prepare(0,0,0,false);State=GameState.Menu;if(Testing)gameObject.AddComponent<RuntimeSmokeTest>().Session=this;
  }
@@ -46,7 +46,7 @@ namespace CyberCar {
  Comms.Tick(0);World.AddDestinationSigns();State=GameState.Briefing;World.Beacon.gameObject.SetActive(false);
  }
  public int TrafficCount=>Level==0&&!Freeplay?6:12+Difficulty*5;
- VehicleController Spawn(string name,Vector3 pos,Quaternion rot,bool player,bool hostile){var go=new GameObject(name);go.transform.SetPositionAndRotation(pos+Vector3.up*.1f,rot);var car=go.AddComponent<VehicleController>();car.IsPlayer=player;car.Session=this;car.SetupVisual(player?World.PlayerPaint:hostile?World.EnemyPaint:World.TrafficPaint);Cars.Add(car);return car;}
+ VehicleController Spawn(string name,Vector3 pos,Quaternion rot,bool player,bool hostile){var go=new GameObject(name);go.transform.SetPositionAndRotation(pos+Vector3.up*.1f,rot);var car=go.AddComponent<VehicleController>();car.IsPlayer=player;car.Session=this;car.SetupVisual(player?World.PlayerPaint:hostile?World.EnemyPaint:World.TrafficFinish(Cars.Count));Cars.Add(car);return car;}
  public void SelectLevel(int level){Prepare(level,StoryCampaign.Maps[level],level<2?0:level<5?1:level<14?2:3,false);}
  public void Begin(){State=GameState.Driving;foreach(var car in Cars)car.Driving=true;Notify("Follow the route arrow. Yield at crosswalks. Select threats, then use 1-3 to diagnose.");}
  public void Menu(){Paused=false;Time.timeScale=1;State=GameState.Menu;foreach(var car in Cars)car.Driving=false;ProgressStore.Save();}

@@ -31,6 +31,10 @@ namespace CyberCar
         {
             int map=world.Network.Map;
             var asphalt=world.Photos.Surface("asphalt_02",4);
+            asphalt.SetColor("_Color",new Color(.63f,.66f,.69f));
+            var travelledAsphalt=new Material(Resources.Load<Shader>("RoadSurface")){name="Weathered driving surface"};owned.Add(travelledAsphalt);
+            foreach(string property in new[]{"_MainTex","_NormalTex","_RoughTex"})travelledAsphalt.SetTexture(property,asphalt.GetTexture(property));
+            var roadPaint=new Material(Resources.Load<Shader>("RoadPaint")){name="Worn road paint"};owned.Add(roadPaint);
             var paving=Detail("Concrete joints",new Color(.46f,.45f,.42f),2,4);
             var facade=new Material(Resources.Load<Shader>("ArchitecturalGlass")){name="Architectural glazing and mullions"};owned.Add(facade);
             var rock=world.Photos.Surface("rocky_terrain_02",6);
@@ -39,7 +43,9 @@ namespace CyberCar
             foreach(var renderer in world.GetComponentsInChildren<MeshRenderer>())
             {
                 string n=renderer.gameObject.name;
-                if(n=="Road"||n=="Intersection"||n=="Untrusted service road")renderer.sharedMaterial=asphalt;
+                if(n=="Road")renderer.sharedMaterial=travelledAsphalt;
+                else if(n=="Intersection"||n=="Untrusted service road"||n=="Interchange apron")renderer.sharedMaterial=asphalt;
+                else if(n=="Center dash"||n=="Edge line"||n=="Crosswalk")renderer.sharedMaterial=roadPaint;
                 else if(n=="Office block"||n=="Perimeter tower")renderer.sharedMaterial=facade;
                 else if(n=="Sidewalk"||n=="Cargo island"||n=="Bridge pier")renderer.sharedMaterial=paving;
                 else if(n=="Canyon mesa"||n=="Canyon floor"||n=="Coastal escarpment"||n=="Shore boulder")renderer.sharedMaterial=rock;

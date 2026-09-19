@@ -22,6 +22,7 @@ namespace CyberCar
         IEnumerator Start()
         {
             yield return null;Session.InputEnabled=false;
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-presentationTest")>=0){yield return PresentationProof();yield return UiProof();Check(runtimeErrors==0,"No runtime errors or exceptions");Debug.Log("PRESENTATION_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-trafficTest")>=0){yield return TrafficProof();Debug.Log("TRAFFIC_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-missionTest")>=0){yield return MissionProof();yield return UiProof();Check(runtimeErrors==0,"No runtime errors or exceptions");Debug.Log("MISSION_SUCCESS / "+checks);Application.Quit(0);yield break;}
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"-uiTest")>=0){yield return VisualProof();yield return UiProof();Debug.Log("UI_VISUAL_SUCCESS / "+checks);Application.Quit(0);yield break;}
@@ -149,10 +150,51 @@ namespace CyberCar
             if(screenshot){File.WriteAllBytes(Path.Combine(Application.dataPath,"..","smoke-menu.png"),screenshot.EncodeToPNG());Destroy(screenshot);}
             Session.ShowAchievements();yield return new WaitForEndOfFrame();
             screenshot=ScreenCapture.CaptureScreenshotAsTexture();File.WriteAllBytes(Path.Combine(Application.dataPath,"..","smoke-achievements.png"),screenshot.EncodeToPNG());Destroy(screenshot);
-            yield return MissionProof();yield return TrafficProof();yield return VisualProof();yield return UiProof();
+            yield return MissionProof();yield return TrafficProof();yield return VisualProof();yield return PresentationProof();yield return UiProof();
             Check(runtimeErrors==0,"No runtime errors or exceptions");
             File.WriteAllText(Path.Combine(Application.dataPath,"..","smoke-results.txt"),"PASS: "+checks+" checks\nPhysics, car collisions, thirteen staged attacks/defenses, drifting, pedestrian safety, four maps, curved bridge driving, extreme eligibility, save recovery, field guide, soundtrack, win/fail lifecycle, zero runtime errors.\n");
             Debug.Log("CYBERCAR_SMOKE_SUCCESS / "+checks);Application.Quit(0);
+        }
+        IEnumerator PresentationProof(){
+            var presentation=FindAnyObjectByType<DrivingPresentation>();
+            for(int map=0;map<4;map++){
+                Session.Prepare(14,map,map==3?3:1,true,seed:718,night:map==3);Session.Begin();yield return new WaitForSeconds(1.2f);
+                bool roadMaterials=true,coordinates=true,paintMaterials=true;int roads=0,markings=0;
+                foreach(var renderer in Session.World.GetComponentsInChildren<MeshRenderer>()){
+                    if(renderer.name=="Road"){
+                        roads++;roadMaterials&=renderer.sharedMaterial.shader.name=="CyberCar/RoadSurface"&&renderer.sharedMaterial.shader.isSupported;
+                        var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;var uv=mesh.uv2;
+                        coordinates&=uv.Length==mesh.vertexCount&&uv.Length>4;
+                        if(uv.Length>4){coordinates&=uv[0].x<0&&uv[1].x>0&&uv[uv.Length-1].y>70;for(int i=4;i<uv.Length;i+=4)coordinates&=uv[i].y>uv[i-4].y;}
+                    }
+                    if(renderer.name=="Center dash"||renderer.name=="Edge line"||renderer.name=="Crosswalk"){markings++;paintMaterials&=renderer.sharedMaterial.shader.name=="CyberCar/RoadPaint"&&renderer.sharedMaterial.shader.isSupported;}
+                }
+                Check(roads==Session.World.Network.Edges.Count&&roadMaterials,"Weathered asphalt is supported on every road in map "+map);
+                Check(coordinates,"Road wear coordinates follow curves continuously on map "+map);
+                Check(markings>0&&paintMaterials,"Worn markings retain supported visible materials on map "+map);
+                if(map==0){
+                    bool grounded=true,supported=true;foreach(var renderer in Session.World.GetComponentsInChildren<MeshRenderer>())if(renderer.name=="Sidewalk"){
+                        grounded&=Mathf.Abs(renderer.bounds.min.y-Session.World.GroundHeight(renderer.bounds.center))<.02f;
+                        var support=renderer.GetComponent<Collider>();supported&=support&&support.Raycast(new Ray(renderer.bounds.center+Vector3.up*2,Vector3.down),out var surface,4)&&Mathf.Abs(surface.point.y-renderer.bounds.max.y)<.01f;
+                    }
+                    Check(grounded,"City sidewalks extend down to their supporting foundation");
+                    Check(supported,"Visible sidewalk tops have matching physical driving surfaces");
+                    var drains=Session.World.GetComponent<StreetDetails>();var drainage=Session.World.transform.Find("Curb drainage details");
+                    Check(drains.DrainCount==Session.World.Network.Edges.Count*2&&drainage&&drainage.GetComponent<MeshRenderer>().sharedMaterial.shader.isSupported&&drainage.GetComponent<Collider>()==null,"Curb drains are combined visible detail without invisible colliders");
+                    var finishes=new System.Collections.Generic.HashSet<Material>();foreach(var car in Session.Cars)if(!car.IsPlayer&&car.GetComponent<TrafficAgent>()&&!car.GetComponent<TrafficAgent>().Hostile)foreach(var renderer in car.GetComponentsInChildren<Renderer>())foreach(var material in renderer.sharedMaterials)if(material.name.StartsWith("Traffic finish"))finishes.Add(material);
+                    Check(finishes.Count>=4,"Ordinary traffic uses distinct shared paint finishes");
+                    Time.timeScale=0;presentation.enabled=false;yield return new WaitForEndOfFrame();var before=ScreenCapture.CaptureScreenshotAsTexture();
+                    presentation.enabled=true;yield return new WaitForEndOfFrame();var after=ScreenCapture.CaptureScreenshotAsTexture();float difference=0;int samples=0;
+                    for(int y=100;y<after.height-180;y+=16)for(int x=after.width/3;x<after.width*2/3;x+=16){Color a=before.GetPixel(x,y),b=after.GetPixel(x,y);difference+=Mathf.Abs(a.r-b.r)+Mathf.Abs(a.g-b.g)+Mathf.Abs(a.b-b.b);samples++;}
+                    Destroy(before);Destroy(after);Time.timeScale=1;
+                    Check(presentation.Applied&&difference/Mathf.Max(1,samples)>.002f,"Camera lighting treatment changes the rendered world pixels");
+                    var street=Session.World.Network.Path(0,1);Vector3 direction=(street[9]-street[7]).normalized;
+                    Session.Player.Recover(street[8]+Vector3.Cross(Vector3.up,direction)*2.7f,Quaternion.LookRotation(direction));yield return new WaitForSeconds(.65f);
+                    yield return Capture("presentation-street-detail.png");
+                }
+                yield return Capture("presentation-map-"+map+".png");
+            }
+            Check(presentation.Applied&&presentation.BloomWidth>0&&presentation.BloomWidth<=640&&presentation.BloomHeight<=540,"Lamp glare uses bounded reduced-resolution buffers");
         }
         IEnumerator VisualProof(){
             Session.Prepare(7,3,1,true);Session.Begin();yield return new WaitForSeconds(1.5f);
